@@ -1,0 +1,97 @@
+@model Nattapong_7379_L002.ViewModel.ServiceItemViewModel
+@{
+    Layout = "_Layout";
+    var label = (string)ViewBag.ServiceTypeLabel;
+    ViewData["Title"] = "แก้ไข" + label + " - " + Model.Name;
+}
+
+<div class="ff-admin-page admin-service-page">
+    <header class="admin-service-heading">
+        <div>
+            <h1>แก้ไข@(label)</h1>
+            <p>@Model.Name</p>
+        </div>
+        <a class="btn btn-outline-secondary admin-service-action" asp-action="Services" asp-route-type="@Model.ServiceType">
+            <partial name="_UiIcon" model='"back"' /> กลับไปรายการ@(label)
+        </a>
+    </header>
+
+    <div class="cafe-form-section">
+        <form asp-action="EditService" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ServiceType" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-bold">ชื่อรายการ <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-bold">คำอธิบาย</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                    <label asp-for="Price" class="form-label fw-bold">ราคา (บาท) <span class="text-danger">*</span></label>
+                    <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="Price" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="OriginalPrice" class="form-label fw-bold">ราคาเดิม (ถ้ามี)</label>
+                    <input asp-for="OriginalPrice" class="form-control" type="number" step="0.01" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImageUrl" class="form-label fw-bold">ลิงก์รูปภาพ (URL)</label>
+                <input asp-for="ImageUrl" class="form-control" />
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mt-2">
+                        <img src="@Model.ImageUrl" alt="Preview" style="max-width:200px;max-height:120px;object-fit:cover;border-radius:8px;" />
+                    </div>
+                }
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                    <label asp-for="BadgeText" class="form-label fw-bold">ข้อความบนป้ายกำกับ</label>
+                    <input asp-for="BadgeText" class="form-control" />
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="BadgeColor" class="form-label fw-bold">สีป้ายกำกับ</label>
+                    <select asp-for="BadgeColor" class="form-select">
+                        <option value="">-- ไม่มี --</option>
+                        <option value="success">เขียว (success)</option>
+                        <option value="danger">แดง (danger)</option>
+                        <option value="warning">เหลือง (warning)</option>
+                        <option value="info">ฟ้า (info)</option>
+                        <option value="primary">น้ำเงิน (primary)</option>
+                        <option value="secondary">เทา (secondary)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                    <label asp-for="SortOrder" class="form-label fw-bold">ลำดับการแสดงผล</label>
+                    <input asp-for="SortOrder" class="form-control" type="number" />
+                </div>
+                <div class="col-12 col-sm-6 d-flex align-items-end">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label fw-bold" asp-for="IsActive">เปิดใช้งาน</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-service-form-actions">
+                <button type="submit" class="btn ff-btn-submit-olive px-4">บันทึกการแก้ไข</button>
+                <a class="btn btn-outline-secondary" asp-action="Services" asp-route-type="@Model.ServiceType">ยกเลิก</a>
+            </div>
+        </form>
+    </div>
+</div>

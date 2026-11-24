@@ -1,0 +1,64 @@
+@model Nattapong_7379_L002.ViewModel.OwnerDashboardViewModel
+@{
+    ViewData["Title"] = "ภาพรวมร้าน";
+    var counts = new[]
+    {
+        (Title: "รายการจองทั้งหมด", Value: Model.TotalBookingsCount, Icon: "calendar"),
+        (Title: "บัญชีผู้ใช้", Value: Model.TotalUsersCount, Icon: "team"),
+        (Title: "แพ็กเกจและบริการ", Value: Model.TotalServicesCount, Icon: "orders")
+    };
+}
+<section class="work-page owner-overview">
+    <header class="work-heading">
+        <h1>ภาพรวมร้าน</h1>
+        <p>ติดตามกำไรสุทธิเดือนนี้และรายการจองล่าสุด</p>
+    </header>
+
+    <partial name="_MonthlyProfit" model="Model.Profit" />
+    <div class="mb-4">
+        <a class="owner-revenue-link" asp-controller="MembershipRevenue" asp-action="Index">
+            ดูรายรับสมาชิก <partial name="_UiIcon" model='"arrow"' />
+        </a>
+    </div>
+
+    <section class="owner-block" aria-labelledby="owner-counts">
+        <h2 class="owner-block-title" id="owner-counts">ข้อมูลร้าน</h2>
+        <dl class="owner-count-grid">
+            @foreach (var metric in counts)
+            {
+                <div class="work-metric owner-count">
+                    <span class="work-icon"><partial name="_UiIcon" model="metric.Icon" /></span>
+                    <dt>@metric.Title</dt>
+                    <dd>@metric.Value.ToString("N0")</dd>
+                </div>
+            }
+        </dl>
+    </section>
+
+    <section class="work-panel owner-bookings" aria-labelledby="owner-bookings">
+        <div class="work-panel-heading d-flex align-items-center gap-3">
+            <span class="work-icon"><partial name="_UiIcon" model='"calendar"' /></span>
+            <h2 class="owner-block-title m-0" id="owner-bookings">รายการจองล่าสุด</h2>
+        </div>
+        @if (Model.RecentBookings.Count == 0)
+        {
+            <p class="work-empty mb-0">ยังไม่มีรายการจอง</p>
+        }
+        else
+        {
+            <ul class="work-list list-unstyled mb-0">
+                @foreach (var booking in Model.RecentBookings)
+                {
+                    <li class="owner-booking-row">
+                        <strong>@booking.ItemName</strong>
+                        <p class="owner-booking-time mb-0">
+                            <partial name="_UiIcon" model='"clock"' />
+                            <span>@booking.BookingDate · @booking.TimeSlot</span>
+                        </p>
+                        <span class="badge work-count owner-booking-guests">@booking.GuestCount ท่าน</span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</section>

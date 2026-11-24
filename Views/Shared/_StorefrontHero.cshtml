@@ -1,0 +1,10 @@
+@model (string Title, string Description, string ImagePath)
+
+<section class="cafe-storefront-hero" data-storefront-hero aria-labelledby="storefront-title">
+    <img class="cafe-storefront-hero-image" src="@Model.ImagePath" asp-append-version="true"
+         alt="" width="1536" height="1024" fetchpriority="high" />
+    <div class="cafe-frame cafe-storefront-hero-content">
+        <h1 id="storefront-title">@Model.Title</h1>
+        <p>@Model.Description</p>
+    </div>
+</section>

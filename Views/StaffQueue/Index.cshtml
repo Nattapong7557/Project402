@@ -1,0 +1,93 @@
+@model Nattapong_7379_L002.ViewModel.StaffQueueViewModel
+@{
+    ViewData["Title"] = "จัดคิวจอง";
+    var pending = Model.QueueItems.Where(item => item.Status == "Pending").ToList();
+    var handled = Model.QueueItems.Where(item => item.Status != "Pending").ToList();
+    var sections = new[]
+    {
+        (Id: "pending-queue", Label: "รออนุมัติ", Icon: "clock", Empty: "ยังไม่มีคำขอจองรออนุมัติ", Items: pending),
+        (Id: "handled-queue", Label: "ประวัติคิวจอง", Icon: "calendar", Empty: "ยังไม่มีคิวที่จัดการแล้ว", Items: handled)
+    };
+}
+<section class="work-page">
+    <header class="work-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div><h1>จัดคิวจอง</h1><p>อนุมัติคำขอจองโต๊ะและบริการ หรือออกคิวให้ลูกค้าที่มาหน้าร้าน</p></div>
+        <a class="btn work-outline" href="#walk-in"><partial name="_UiIcon" model="@("plus")" /> เพิ่มคิว Walk-in</a>
+    </header>
+    @foreach (var group in sections)
+    {
+        <section class="card work-panel mb-4" aria-labelledby="@group.Id">
+            <div class="work-panel-heading d-flex align-items-center gap-3">
+                <span class="work-icon"><partial name="_UiIcon" model="group.Icon" /></span>
+                <h2 class="h5 m-0" id="@group.Id">@group.Label</h2>
+                <span class="badge work-count">@group.Items.Count</span>
+            </div>
+            @if (group.Items.Count == 0)
+            {
+                <p class="work-empty mb-0">@group.Empty</p>
+            }
+            else
+            {
+                <div class="work-list">
+                    @foreach (var item in group.Items)
+                    {
+                        <article class="work-row">
+                            <div>
+                                <small class="text-muted">คิว #@item.Id</small>
+                                <h3 class="h6 my-1">@item.ItemName</h3>
+                                <p class="mb-0 small">@item.User.Name · @item.BookingDate · @item.TimeSlot · @item.GuestCount ท่าน</p>
+                                @if (!string.IsNullOrWhiteSpace(item.Note)) { <p class="small text-muted mb-0">@item.Note</p> }
+                            </div>
+                            @if (item.Status == "Pending")
+                            {
+                                <form asp-controller="StaffQueue" asp-action="UpdateQueueStatus" method="post" class="d-flex flex-wrap gap-2">
+                                    <input type="hidden" name="SelectedBookingId" value="@item.Id" />
+                                    <button class="btn work-primary" name="NewStatus" value="QueueConfirmed" type="submit">อนุมัติรับคิว</button>
+                                    <button class="btn work-outline" name="NewStatus" value="Cancelled" type="submit">ยกเลิกคำขอ</button>
+                                </form>
+                            }
+                            else
+                            {
+                                var statusLabel = item.Status switch
+                                {
+                                    "Cancelled" => "ยกเลิกแล้ว", "Paid" => "ชำระแล้ว", "Completed" => "เสร็จสิ้น",
+                                    "Served" => "เสิร์ฟแล้ว", "Checked-In" => "เช็คอินแล้ว", "Preparing" => "กำลังเตรียม",
+                                    _ => "รับคิวแล้ว"
+                                };
+                                <span class="badge work-count">@statusLabel</span>
+                            }
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    }
+    <section class="card work-panel" id="walk-in" aria-labelledby="walk-in-heading">
+        <div class="work-panel-heading d-flex align-items-center gap-3">
+            <span class="work-icon"><partial name="_UiIcon" model="@("plus")" /></span>
+            <h2 id="walk-in-heading" class="h5 m-0">ออกบัตรคิว Walk-in</h2>
+        </div>
+        <form asp-controller="StaffQueue" asp-action="AddWalkInQueue" method="post" class="row g-3 mt-1 align-items-end">
+            <div class="col-sm-4 col-xl-2">
+                <label asp-for="WalkInServiceType" class="form-label">ประเภท</label>
+                <select asp-for="WalkInServiceType" class="form-select">
+                    <option value="Table">โต๊ะคาเฟ่</option><option value="Photographer">ช่างภาพ</option>
+                    <option value="Makeup">ช่างแต่งหน้า</option><option value="Costume">เช่าชุด</option>
+                </select>
+            </div>
+            <div class="col-sm-8 col-xl-4">
+                <label asp-for="WalkInItemName" class="form-label">โซนที่นั่งหรือบริการ</label>
+                <input asp-for="WalkInItemName" class="form-control" required maxlength="150" />
+            </div>
+            <div class="col-sm-5 col-xl-2">
+                <label asp-for="WalkInTimeSlot" class="form-label">รอบเวลา</label>
+                <input asp-for="WalkInTimeSlot" class="form-control" required maxlength="50" />
+            </div>
+            <div class="col-sm-3 col-xl-2">
+                <label asp-for="WalkInGuestCount" class="form-label">จำนวนคน</label>
+                <input asp-for="WalkInGuestCount" class="form-control" type="number" min="1" max="15" required />
+            </div>
+            <div class="col-sm-4 col-xl-2"><button class="btn work-primary w-100" type="submit">ออกบัตรคิว</button></div>
+        </form>
+    </section>
+</section>

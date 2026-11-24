@@ -1,0 +1,70 @@
+@using System.Globalization
+@using Nattapong_7379_L002.Services.FoodOrdering
+@model List<ServiceItem>
+@{
+    var isAdmin = string.Equals(Context.Session.GetString("AccountRole"), "Admin", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="cafe-service-grid">
+    @foreach (var item in Model)
+    {
+        var isPromotion = item.ServiceType == "Promotion";
+        var comboDiscount = FoodPricing.ComboDiscount(item);
+        var bookingPrice = item.Price - comboDiscount;
+        var comparePrice = comboDiscount > 0 ? item.Price : item.OriginalPrice;
+        var (category, cover) = item.ServiceType switch
+        {
+            "Photographer" => ("ช่างภาพ", "camera"),
+            "Makeup" => ("ช่างแต่งหน้า", "makeup"),
+            "Costume" => ("เช่าชุดสตูดิโอ", "costume"),
+            _ => ("โปรโมชัน", "promotion")
+        };
+        <article class="cafe-service-card @(isPromotion ? "cafe-service-card-promotion" : "")">
+            <div class="cafe-service-cover cafe-service-cover-@cover">
+                <div class="cafe-service-placeholder" aria-hidden="true">
+                    <span>@category</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                {
+                    <img src="@item.ImageUrl" alt="" loading="lazy" decoding="async" data-service-image />
+                }
+                @if (!string.IsNullOrWhiteSpace(item.BadgeText))
+                {
+                    <span class="cafe-service-tag">@item.BadgeText</span>
+                }
+            </div>
+
+            <div class="cafe-service-details">
+                <h2>@item.Name</h2>
+                @if (!string.IsNullOrWhiteSpace(item.Description))
+                {
+                    <p>@item.Description</p>
+                }
+                <div class="cafe-service-actions">
+                    <div class="cafe-service-prices">
+                        <span class="cafe-service-price">฿@bookingPrice.ToString("#,0.##", CultureInfo.InvariantCulture)</span>
+                        @if (comparePrice.HasValue)
+                        {
+                            <del><span class="visually-hidden">ราคาเดิม </span>฿@comparePrice.Value.ToString("#,0.##", CultureInfo.InvariantCulture)</del>
+                        }
+                    </div>
+                    <button class="cafe-button cafe-button-dark ff-btn-book-service" type="button"
+                            data-book-service data-service-type="@item.ServiceType"
+                            data-service-item-id="@item.Id" data-item-name="@item.Name" data-price="@bookingPrice.ToString(CultureInfo.InvariantCulture)">
+                        @(isPromotion ? "จองโปรโมชันนี้" : "จองบริการนี้")
+                    </button>
+                    @if (isAdmin)
+                    {
+                        <div class="cafe-service-admin-actions">
+                            <a class="cafe-button cafe-button-outline" asp-controller="Admin" asp-action="EditService" asp-route-id="@item.Id">แก้ไข</a>
+                            <form asp-controller="Admin" asp-action="DeleteService" method="post" data-confirm-service-deletion="@item.Name">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button class="cafe-button cafe-service-delete" type="submit">ลบ</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </article>
+    }
+</div>

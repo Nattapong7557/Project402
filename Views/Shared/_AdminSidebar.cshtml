@@ -1,0 +1,82 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var name = Context.Session.GetString("AccountDisplayName") ?? Context.Session.GetString("AccountName");
+    var section = controller == "Admin" ? action switch
+    {
+        "Index" or "Register" => "accounts",
+        "Bookings" => "bookings",
+        "Services" or "CreateService" or "EditService" => "services",
+        _ => controller
+    } : controller == "FoodStaff" ? action : controller == "Booking" ? "Home" : controller;
+
+    var management = new (string Key, string Controller, string Action, string Label, string Icon)[]
+    {
+        ("Home", "Home", "Index", "หน้าร้าน", "M3 10l9-7 9 7v10H3zM9 20v-6h6v6"),
+        ("Owner", "Owner", "Index", "ภาพรวมร้าน", "M3 3v18h18M8 16v-4m5 4V8m5 8V5"),
+        ("MembershipRevenue", "MembershipRevenue", "Index", "รายรับสมาชิก", "M5 3h14v18l-3-2-4 2-4-2-3 2V3Zm4 5h6m-6 4h6m-6 4h3"),
+        ("accounts", "Admin", "Index", "บัญชีผู้ใช้", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M5 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0Zm13 8a4 4 0 0 1 4 4v2m-5-18a4 4 0 0 1 0 8"),
+        ("bookings", "Admin", "Bookings", "รายการจอง", "M4 6h16v15H4zM8 3v6m8-6v6M4 11h16m-11 5h6"),
+        ("services", "Admin", "Services", "บริการและโปรโมชัน", "M4 4h7l9 9-7 7-9-9V4Zm4 4h.01"),
+    };
+    var operations = new (string Key, string Controller, string Action, string Label, string Icon)[]
+    {
+        ("Cashier", "FoodStaff", "Cashier", "แคชเชียร์", "M4 9h16l1 10H3L4 9Zm2 0V4h7v5m-6 5h4m4 0h2"),
+        ("StaffQueue", "StaffQueue", "Index", "จัดคิวลูกค้า", "M5 6h14M5 12h14M5 18h8m5 0 2 2 3-4"),
+        ("Kitchen", "FoodStaff", "Kitchen", "ครัว", "M4 16h16M6 16a6 6 0 1 1 12 0m-6-6V7m-2 0h4M3 20h18"),
+        ("Accounting", "FoodStaff", "Accounting", "บัญชีร้าน", "M6 3h12v18H6zM9 7h6m-6 5h1m4 0h1m-6 4h1m4 0h1"),
+    };
+}
+
+<aside class="offcanvas-lg offcanvas-start admin-rail" id="adminSidebar" tabindex="-1" aria-labelledby="adminSidebarTitle">
+    <div class="admin-rail-header">
+        <a class="admin-rail-brand" asp-controller="Home" asp-action="Index">
+            <span class="admin-brand-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Zm12 1h2a3 3 0 0 1 0 6h-2M3 22h16M8 6V3m5 3V3"/>
+                </svg>
+            </span>
+            <span id="adminSidebarTitle">Café &amp; Photo Studio</span>
+        </a>
+        <button class="btn-close d-lg-none" type="button" data-bs-dismiss="offcanvas"
+                data-bs-target="#adminSidebar" aria-label="ปิดเมนูผู้ดูแลระบบ"></button>
+    </div>
+
+    <nav class="admin-rail-nav" aria-label="เมนูผู้ดูแลระบบ">
+        @foreach (var group in new[]
+        {
+            (Key: "management", Label: "จัดการร้าน", Links: management),
+            (Key: "operations", Label: "งานประจำร้าน", Links: operations)
+        })
+        {
+            <section class="admin-rail-group admin-rail-group-@group.Key" aria-labelledby="admin-rail-@group.Key">
+                <h2 class="admin-rail-caption" id="admin-rail-@group.Key">@group.Label</h2>
+                <ul>
+                    @foreach (var item in group.Links)
+                    {
+                        <li>
+                            <a class="admin-rail-link" asp-controller="@item.Controller" asp-action="@item.Action"
+                               aria-current="@(section == item.Key ? "page" : null)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="@item.Icon"/></svg>
+                                <span>@item.Label</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    </nav>
+
+    <div class="admin-rail-footer">
+        <div class="admin-rail-account">
+            <small>ผู้ดูแลระบบ</small>
+            <strong>@name</strong>
+        </div>
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post">
+            <button class="admin-rail-link" type="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h6m4-13 5 5-5 5m5-5H8"/></svg>
+                <span>ออกจากระบบ</span>
+            </button>
+        </form>
+    </div>
+</aside>

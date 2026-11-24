@@ -1,0 +1,140 @@
+@using System.Globalization
+@using Nattapong_7379_L002.Services.FoodOrdering
+@using Nattapong_7379_L002.ViewModel.FoodOrdering
+@model FoodMenuViewModel
+@{
+    Layout = "_FoodOrderingLayout";
+    ViewData["Title"] = "สั่งอาหารที่โต๊ะ";
+    var visibleCategories = FoodMenuCategories.All.Where(category => category.Key == "all" || Model.Menu.Any(item => item.Category == category.Key));
+}
+
+<section aria-labelledby="food-menu-title">
+    <div class="food-editorial-heading">
+        <div>
+            <h1 id="food-menu-title">สั่งอาหารที่โต๊ะ</h1>
+            <p>เลือกอาหารและเครื่องดื่ม ระบุหมายเลขโต๊ะ แล้วส่งออเดอร์ให้แคชเชียร์</p>
+        </div>
+        @if (Model.CanOrder && Model.Menu.Count > 0)
+        {
+            <a class="btn food-outline-button food-cart-trigger" href="#food-basket" data-cart-open>
+                <partial name="_UiIcon" model='"basket"' /> ตะกร้า <span class="food-cart-count" data-cart-count>0</span>
+            </a>
+        }
+    </div>
+    <div class="food-category-list" role="group" aria-label="หมวดหมู่เมนู">
+        @foreach (var category in visibleCategories)
+        {
+            <button type="button" data-food-filter="@category.Key" aria-pressed="@(category.Key == "all" ? "true" : "false")" aria-controls="food-menu-list">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="@category.Icon" /></svg>
+                @category.Label
+            </button>
+        }
+    </div>
+    @if (Model.Menu.Count == 0)
+    {
+        <p class="food-empty">ขณะนี้ยังไม่มีเมนูให้สั่ง</p>
+    }
+    else
+    {
+        <form class="food-order-grid" asp-controller="FoodOrder" asp-action="Submit" method="post" data-food-cart>
+            <input asp-for="Order.RequestToken" type="hidden" />
+            <div class="food-menu-grid" id="food-menu-list">
+                @for (var i = 0; i < Model.Menu.Count; i++)
+                {
+                    var item = Model.Menu[i];
+                    <article class="card food-menu-tile" data-food-category="@item.Category">
+                        <div class="food-menu-photo">
+                            <img src="@item.ImageUrl" alt="" width="760" height="456" loading="lazy" />
+                        </div>
+                        <div class="food-menu-details">
+                            <h2 lang="en" id="food-name-@i">@item.Name</h2>
+                            <p>@item.Description</p>
+                            <div class="food-menu-bottom">
+                                <strong>฿@item.Price.ToString("#,0.##", CultureInfo.InvariantCulture)</strong>
+                                @if (Model.CanOrder)
+                                {
+                                    <input asp-for="Order.Lines[i].MenuItemId" type="hidden" />
+                                    <div class="food-quantity" data-quantity-controls>
+                                        <button type="button" data-quantity-step="-1" aria-label="@($"ลดจำนวน {item.Name}")">−</button>
+                                        <input asp-for="Order.Lines[i].Quantity" type="number" min="0" max="20" inputmode="numeric"
+                                               data-food-price="@item.Price.ToString(CultureInfo.InvariantCulture)" data-food-item="@item.Id" aria-label="@($"จำนวน {item.Name}")" />
+                                        <button type="button" data-quantity-step="1" aria-label="@($"เพิ่มจำนวน {item.Name}")">+</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+            @if (Model.CanOrder)
+            {
+                <dialog class="card food-basket food-cart-dialog" id="food-basket" aria-labelledby="basket-title" open>
+                    <header class="food-basket-heading">
+                        <span class="food-section-icon"><partial name="_UiIcon" model='"basket"' /></span>
+                        <h2 id="basket-title">ตะกร้า</h2>
+                        <button class="btn food-cart-close" type="button" data-cart-close aria-label="ปิดตะกร้า" hidden>×</button>
+                    </header>
+                    <div class="food-cart-items" data-cart-preview hidden>
+                        <p class="food-cart-empty" data-cart-empty>ตะกร้ายังว่าง เลือกอาหารหรือเครื่องดื่มเพื่อเริ่มสั่ง</p>
+                        <ul class="list-unstyled mb-0" aria-label="เมนูที่เลือก">
+                            @foreach (var item in Model.Menu)
+                            {
+                                <li class="food-cart-line" data-cart-item="@item.Id" hidden>
+                                    <div class="food-cart-line-head">
+                                        <strong>@item.Name</strong>
+                                        <strong data-cart-line-total></strong>
+                                    </div>
+                                    <div class="food-cart-line-actions">
+                                        <div class="food-quantity" role="group" aria-label="@($"ปรับจำนวน {item.Name}")">
+                                            <button type="button" data-cart-change="-1" aria-label="@($"ลดจำนวน {item.Name}")">−</button>
+                                            <span data-cart-line-quantity></span>
+                                            <button type="button" data-cart-change="1" aria-label="@($"เพิ่มจำนวน {item.Name}")">+</button>
+                                        </div>
+                                        <button class="btn food-cart-remove" type="button" data-cart-change="remove" aria-label="@($"ลบ {item.Name} ออกจากตะกร้า")">ลบ</button>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        <button class="btn food-outline-button food-cart-add" type="button" data-cart-close hidden>
+                            <partial name="_UiIcon" model='"plus"' /> เลือกเมนูเพิ่ม
+                        </button>
+                    </div>
+                    <label asp-for="Order.TableNumber">หมายเลขโต๊ะ</label>
+                    <input asp-for="Order.TableNumber" class="form-control" type="number" min="1" max="99" required placeholder="เช่น 5" />
+                    <div class="food-basket-total">
+                        <span>ยอดก่อนส่วนลด <small data-food-count>0 ชิ้น</small></span>
+                        <output data-food-total aria-live="polite">฿0.00</output>
+                    </div>
+                    <button class="btn food-button food-basket-submit" type="submit">
+                        ส่งออเดอร์ <partial name="_UiIcon" model='"arrow"' />
+                    </button>
+                    <details class="food-offers">
+                        <summary>ส่วนลดที่ใช้ได้</summary>
+                        <ul>
+                            <li>เครื่องดื่มครบ 5 แก้ว ลด ฿50</li>
+                            <li>ยอดรวมครบ ฿1,000 ลด ฿100</li>
+                            <li>สั่งช่วง 13:00 ถึงก่อน 16:00 น. ลด ฿50</li>
+                        </ul>
+                        <p>ตรวจสิทธิ์ส่วนลดเดือนเกิดได้ที่หน้าเช็คบิล</p>
+                    </details>
+                </dialog>
+            }
+            else
+            {
+                <aside class="card food-basket" aria-labelledby="basket-title">
+                    <header class="food-basket-heading">
+                        <span class="food-section-icon"><partial name="_UiIcon" model='"basket"' /></span>
+                        <h2 id="basket-title">ตะกร้า</h2>
+                    </header>
+                    <p>เข้าสู่ระบบเพื่อเลือกจำนวน ระบุโต๊ะ และส่งออเดอร์</p>
+                    <a class="food-button" asp-controller="Account" asp-action="Login"
+                       asp-route-returnUrl="@Url.Action("Index", "FoodOrder")">เข้าสู่ระบบเพื่อสั่ง</a>
+                </aside>
+            }
+        </form>
+    }
+</section>
+
+@section Scripts {
+    <script type="module" src="~/js/food-ordering.mjs" asp-append-version="true"></script>
+}

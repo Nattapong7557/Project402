@@ -1,0 +1,164 @@
+@model Nattapong_7379_L002.ViewModel.AdminUserListViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "รายชื่อผู้ใช้";
+}
+
+<section class="ff-admin-page work-page work-admin">
+    <div class="ff-admin-heading work-heading">
+        <div>
+            <h1>รายชื่อบัญชีผู้ใช้</h1>
+            <p>จัดการข้อมูลและบทบาทของผู้ใช้ในระบบ</p>
+        </div>
+        <a class="btn work-primary" asp-action="Register"><partial name="_UiIcon" model="@("plus")" /> เพิ่มบัญชี</a>
+    </div>
+
+    @if (TempData["AdminSuccess"] is string successMessage)
+    {
+        <div class="ff-admin-notice ff-admin-notice-success" role="status">@successMessage</div>
+    }
+    @if (TempData["AdminError"] is string errorMessage)
+    {
+        <div class="ff-admin-notice ff-admin-notice-error" role="alert">@errorMessage</div>
+    }
+
+    <div class="cafe-table-frame admin-accounts-table" role="region" aria-label="ตารางบัญชีผู้ใช้" tabindex="0">
+        <table class="ff-user-table">
+            <thead>
+                <tr>
+                    <th>ชื่อ</th>
+                    <th>ชื่อผู้ใช้</th>
+                    <th>อีเมล</th>
+                    <th>เบอร์โทรศัพท์</th>
+                    <th>บทบาท</th>
+                    <th>การจัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Users.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="ff-empty-state">ยังไม่มีบัญชีผู้ใช้</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var account in Model.Users)
+                    {
+                        <tr>
+                            <td>@account.Name</td>
+                            <td>@account.Username</td>
+                            <td>@account.Email</td>
+                            <td>@(string.IsNullOrWhiteSpace(account.PhoneNumber) ? "-" : account.PhoneNumber)</td>
+                            <td><span class="ff-role-badge">@account.RoleName</span></td>
+                            <td>
+                                <div class="ff-user-row-actions">
+                                    <button class="ff-row-button ff-edit-button" type="button"
+                                            data-open-edit
+                                            data-user-id="@account.Id"
+                                            data-user-name="@account.Name"
+                                            data-user-username="@account.Username"
+                                            data-user-email="@account.Email"
+                                            data-user-phone="@account.PhoneNumber"
+                                            data-user-role="@account.RoleId">
+                                        แก้ไข
+                                    </button>
+                                    <button class="ff-row-button ff-row-delete-button" type="button"
+                                            data-open-delete
+                                            data-user-id="@account.Id"
+                                            data-user-email="@account.Email">
+                                        ลบ
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <dialog class="ff-user-editor" id="user-editor" aria-labelledby="user-editor-title">
+        <div class="ff-user-editor-heading">
+            <div>
+                <span class="ff-eyebrow">USER MANAGEMENT</span>
+                <h2 id="user-editor-title">แก้ไขข้อมูลผู้ใช้</h2>
+                <p>แก้ไขข้อมูลและ Role ของบัญชีนี้</p>
+            </div>
+            <button class="ff-modal-close" type="button" data-close-dialog aria-label="ปิด">×</button>
+        </div>
+        <form class="ff-user-editor-form" asp-action="EditUser" method="post">
+            <input type="hidden" name="Id" id="edit-user-id" />
+            <label for="edit-user-name">ชื่อ</label>
+            <input class="ff-editor-input" name="Name" id="edit-user-name" maxlength="100" required />
+            <label for="edit-user-username">ชื่อผู้ใช้</label>
+            <input class="ff-editor-input" name="Username" id="edit-user-username" maxlength="50" required />
+            <label for="edit-user-email">อีเมล</label>
+            <input class="ff-editor-input" name="Email" id="edit-user-email" type="email" maxlength="100" required />
+            <label for="edit-user-phone">เบอร์โทรศัพท์</label>
+            <input class="ff-editor-input" name="PhoneNumber" id="edit-user-phone" maxlength="20" required />
+            <label for="edit-user-role">Role</label>
+            <select class="ff-editor-input" name="RoleId" id="edit-user-role" required>
+                @foreach (var role in Model.Roles)
+                {
+                    <option value="@role.Id">@role.Name</option>
+                }
+            </select>
+            <div class="ff-modal-actions">
+                <button class="ff-admin-button" type="submit">บันทึก</button>
+                <button class="ff-secondary-button" type="button" data-close-dialog>ยกเลิก</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog class="ff-delete-confirm" id="delete-confirm" aria-labelledby="delete-confirm-title">
+        <div class="ff-user-editor-heading">
+            <div>
+                <span class="ff-eyebrow">CONFIRM DELETE</span>
+                <h2 id="delete-confirm-title">ยืนยันการลบบัญชี</h2>
+            </div>
+            <button class="ff-modal-close" type="button" data-close-dialog aria-label="ปิด">×</button>
+        </div>
+        <p class="ff-delete-confirm-message">
+            ต้องการลบบัญชี <strong id="delete-user-email"></strong>ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+        </p>
+        <form asp-action="DeleteUser" method="post">
+            <input type="hidden" name="userId" id="delete-user-id" />
+            <div class="ff-modal-actions">
+                <button class="ff-admin-button ff-delete-button" type="submit">ยืนยันลบ</button>
+                <button class="ff-secondary-button" type="button" data-close-dialog>ยกเลิก</button>
+            </div>
+        </form>
+    </dialog>
+</section>
+
+@section Scripts {
+    <script>
+        const userEditor = document.getElementById("user-editor");
+        const deleteConfirm = document.getElementById("delete-confirm");
+
+        document.querySelectorAll("[data-open-edit]").forEach(button =>{
+            button.addEventListener("click", () =>{
+                document.getElementById("edit-user-id").value = button.dataset.userId;
+                document.getElementById("edit-user-name").value = button.dataset.userName;
+                document.getElementById("edit-user-username").value = button.dataset.userUsername;
+                document.getElementById("edit-user-email").value = button.dataset.userEmail;
+                document.getElementById("edit-user-phone").value = button.dataset.userPhone || "";
+                document.getElementById("edit-user-role").value = button.dataset.userRole;
+                userEditor.showModal();
+            });
+        });
+
+        document.querySelectorAll("[data-open-delete]").forEach(button =>{
+            button.addEventListener("click", () =>{
+                document.getElementById("delete-user-id").value = button.dataset.userId;
+                document.getElementById("delete-user-email").textContent = button.dataset.userEmail;
+                deleteConfirm.showModal();
+            });
+        });
+
+        document.querySelectorAll("[data-close-dialog]").forEach(button =>{
+            button.addEventListener("click", () =>button.closest("dialog").close());
+        });
+    </script>
+}

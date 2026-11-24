@@ -1,0 +1,80 @@
+﻿@model List<Nattapong_7379_L002.Models.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Staff Queue - Manage";
+}
+
+<div class="ff-role-workspace p-4 bg-white rounded-4 shadow-sm">
+    <!-- Top Header with Pink Logout Button matching Figma -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <span class="badge bg-info-subtle text-info mb-1">ROLE WORKSPACE</span>
+            <h3 class="fw-bold m-0">Staff Queue - Manage</h3>
+            <p class="text-muted small m-0">คอยดูแลการจองโต๊ะ จัดคิวลูกค้า และดูแลการให้บริการสตูดิโอ</p>
+        </div>
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post" class="m-0">
+            <button type="submit" class="btn px-4 py-2 fw-bold rounded-3" style="background:#ff9aa2; color:#4a1c1c; border:none;">
+                Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Queue Horizontal Cards matching Figma -->
+    <div class="d-flex flex-column gap-4">
+        @if (!Model.Any())
+        {
+            <div class="p-4 rounded-4" style="background:#e0e0e0;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-1">คิวที่ #Q01 - โซน A: Window Studio โต๊ะริมหน้าต่าง</h5>
+                        <p class="mb-0 text-muted small">ลูกค้า: คุณณัฐพงศ์ (2 ท่าน) • รอบเวลา 13:00 - 15:00 น.</p>
+                    </div>
+                    <span class="badge bg-success">Confirmed</span>
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    <button class="btn btn-sm px-4 py-1 fw-bold rounded-2" style="background:#d0d0d0;" onclick="alert('เรียกคิว #Q01 สำเร็จ')">เรียกคิว</button>
+                    <button class="btn btn-sm px-4 py-1 fw-bold rounded-2" style="background:#d0d0d0;" onclick="alert('เช็คอินเข้าโต๊ะเรียบร้อย')">รับเข้าโต๊ะ</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div>
+                    <div class="p-4 rounded-4" style="background:#e0e0e0;">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-1">คิวที่ #@item.Id - [@item.ServiceType] @item.ItemName</h5>
+                                <p class="mb-1 text-dark small">
+                                     ลูกค้า: <strong>@(item.User?.Name ?? "ลูกค้าทั่วไป")</strong>(@(item.User?.PhoneNumber ?? "-")) • จำนวน @item.GuestCount ท่าน
+                                </p>
+                                <p class="mb-0 text-muted small">
+                                     วันที่: @item.BookingDate | ⏰ เวลา: @item.TimeSlot |  หมายเหตุ: @(string.IsNullOrEmpty(item.Note) ? "-" : item.Note)
+                                </p>
+                            </div>
+                            <span class="badge @(item.Status == "Confirmed" ? "bg-success" : item.Status == "Cancelled" ? "bg-danger" : "bg-primary") fs-6">
+                                @item.Status
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Two Sub-bars below each queue block matching Figma -->
+                    <div class="d-flex gap-3 mt-2">
+                        <form asp-action="QuickUpdateBooking" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="status" value="Checked-In" />
+                            <input type="hidden" name="returnAction" value="StaffQueueManage" />
+                            <button type="submit" class="btn btn-sm px-4 py-1 fw-bold rounded-2" style="background:#e0e0e0;">เรียกคิว / เช็คอินเข้าใช้บริการ</button>
+                        </form>
+                        <form asp-action="QuickUpdateBooking" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="status" value="Cancelled" />
+                            <input type="hidden" name="returnAction" value="StaffQueueManage" />
+                            <button type="submit" class="btn btn-sm px-4 py-1 fw-bold rounded-2 text-danger" style="background:#e0e0e0;">ข้ามคิว / ยกเลิก</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

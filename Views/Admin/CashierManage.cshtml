@@ -1,0 +1,102 @@
+﻿@model List<Nattapong_7379_L002.Models.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Cashiers and Staff - Manage";
+}
+
+<div class="ff-role-workspace p-4 bg-white rounded-4 shadow-sm">
+    <!-- Top Header with Pink Logout Button matching Figma -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <span class="badge bg-success-subtle text-success mb-1">ROLE WORKSPACE</span>
+            <h3 class="fw-bold m-0">Cashiers and Staff - Manage</h3>
+            <p class="text-muted small m-0">รับออเดอร์ ดูแลระบบชำระเงิน และตรวจสอบสถานะโต๊ะ</p>
+        </div>
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post" class="m-0">
+            <button type="submit" class="btn px-4 py-2 fw-bold rounded-3" style="background:#ff9aa2; color:#4a1c1c; border:none;">
+                Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Filter Pills (Green bars in Figma) -->
+    <div class="d-flex gap-2 mb-4">
+        <span class="px-4 py-2 rounded-2 fw-bold small" style="background:#b5cfb7; color:#2b4c2e;">โต๊ะที่เปิดอยู่ (@Model.Count(b =>b.Status != "Cancelled"))</span>
+        <span class="px-4 py-2 rounded-2 fw-bold small" style="background:#d9e8da; color:#2b4c2e;">ชำระเงินแล้ว (@Model.Count(b =>b.Status == "Completed" || b.Status == "Paid"))</span>
+    </div>
+
+    <!-- Table Cards Grid matching Figma -->
+    <div class="row g-4">
+        @if (!Model.Any())
+        {
+            <!-- Default Demo Table Cards matching Figma when no DB bookings yet -->
+            <div class="col-md-4 col-lg-3">
+                <div class="rounded-4 overflow-hidden shadow-sm border" style="background:#e0e0e0;">
+                    <div class="p-3" style="min-height:220px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark">Table #1</span>
+                            <span class="badge rounded-pill" style="background:#b5cfb7; color:#2b4c2e;">กำลังใช้บริการ</span>
+                        </div>
+                        <p class="small text-dark mb-1">• Matcha Latte x2</p>
+                        <p class="small text-dark mb-1">• Croissant Set x1</p>
+                        <p class="fw-bold text-success mt-3 mb-0">ยอดรวม: ฿450</p>
+                    </div>
+                    <div class="p-2 d-flex gap-2" style="background:#c59b9b;">
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="alert('พิมพ์ใบเสร็จ Table #1 เรียบร้อย')">เช็คบิล</button>
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="alert('รับชำระเงิน Table #1 สำเร็จ')">ชำระเงิน</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-3">
+                <div class="rounded-4 overflow-hidden shadow-sm border" style="background:#e0e0e0;">
+                    <div class="p-3" style="min-height:220px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark">Table #21</span>
+                            <span class="badge rounded-pill" style="background:#b5cfb7; color:#2b4c2e;">รอชำระเงิน</span>
+                        </div>
+                        <p class="small text-dark mb-1">• Studio Combo Set x1</p>
+                        <p class="small text-dark mb-1">• Caramel Macchiato x2</p>
+                        <p class="fw-bold text-success mt-3 mb-0">ยอดรวม: ฿2,490</p>
+                    </div>
+                    <div class="p-2 d-flex gap-2" style="background:#c59b9b;">
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="alert('พิมพ์ใบเสร็จ Table #21 เรียบร้อย')">เช็คบิล</button>
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="alert('รับชำระเงิน Table #21 สำเร็จ')">ชำระเงิน</button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="rounded-4 overflow-hidden shadow-sm border h-100 d-flex flex-column justify-content-between" style="background:#e0e0e0;">
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-dark">Table #@item.Id (@item.ServiceType)</span>
+                                <span class="badge rounded-pill" style="background:#b5cfb7; color:#2b4c2e;">@item.Status</span>
+                            </div>
+                            <div class="small fw-bold text-dark mb-1">@item.ItemName</div>
+                            <div class="small text-muted mb-1">ลูกค้า: @(item.User?.Name ?? "Walk-in") (@item.GuestCount ท่าน)</div>
+                            <div class="small text-muted">เวลา: @item.BookingDate (@item.TimeSlot)</div>
+                        </div>
+                        <div class="p-2 d-flex gap-2" style="background:#c59b9b;">
+                            <form asp-action="QuickUpdateBooking" method="post" class="flex-fill m-0">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="status" value="Paid" />
+                                <input type="hidden" name="returnAction" value="CashierManage" />
+                                <button type="submit" class="btn btn-light btn-sm w-100 fw-bold rounded-3">รับชำระเงิน</button>
+                            </form>
+                            <form asp-action="QuickUpdateBooking" method="post" class="flex-fill m-0">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="status" value="Completed" />
+                                <input type="hidden" name="returnAction" value="CashierManage" />
+                                <button type="submit" class="btn btn-light btn-sm w-100 fw-bold rounded-3">ปิดโต๊ะ</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

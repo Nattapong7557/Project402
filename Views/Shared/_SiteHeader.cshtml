@@ -1,0 +1,141 @@
+@using Nattapong_7379_L002.Services.FoodOrdering
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var accountName = Context.Session.GetString("AccountName");
+    var displayName = Context.Session.GetString("AccountDisplayName") ?? accountName;
+    var package = Context.Session.GetString("AccountPackage") ?? "Premium";
+    var role = Context.Session.GetString("AccountRole");
+    var hasAccount = !string.IsNullOrWhiteSpace(accountName);
+    var isAdmin = string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
+    var workspace = StaffWorkspace.ForRole(role);
+    var adminWorkspace = isAdmin && controller != "Home" && controller != "Booking";
+    var publicLinks = new (string Controller, string Action, string? Fragment, string Label)[]
+    {
+        ("Home", "Index", "menuSection", "เมนูร้าน"),
+        ("Booking", "Promotions", null, "โปรโมชัน"),
+        ("Booking", "Makeup", null, "ช่างแต่งหน้า"),
+        ("Booking", "Photographer", null, "ช่างภาพ"),
+        ("Booking", "Costumes", null, "เช่าชุด"),
+        ("Booking", "Index", null, "การจองของฉัน")
+    };
+}
+
+@if (adminWorkspace)
+{
+    <header class="admin-topbar">
+        <nav class="admin-topbar-content" aria-label="แถบผู้ดูแลระบบ">
+            <button class="admin-menu-toggle d-lg-none" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="เปิดเมนูผู้ดูแลระบบ">
+                <svg class="nav-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </button>
+            <div class="admin-topbar-heading">
+                <span class="site-nav-mark d-none d-lg-grid">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v16H3zM9 4v16m3-11h5m-5 5h5"/></svg>
+                </span>
+                <span>จัดการร้าน<small>ผู้ดูแลระบบ</small></span>
+            </div>
+            <a class="site-nav-button" asp-controller="Home" asp-action="Index">
+                ดูหน้าร้าน
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M8 6h10v10"/></svg>
+            </a>
+        </nav>
+    </header>
+}
+else if (workspace is not null)
+{
+    <header class="work-topbar">
+        <nav class="work-topbar-inner" aria-label="เมนูหน้าทำงาน">
+            <a class="work-topbar-brand" asp-controller="@workspace.Controller" asp-action="@workspace.Action">
+                <span class="work-icon"><partial name="_UiIcon" model="workspace.Icon" /></span>
+                <span><strong>@workspace.Label</strong><small>Café &amp; Photo Studio</small></span>
+            </a>
+            <div class="work-topbar-account">
+                <span>@displayName</span>
+                <form asp-controller="Account" asp-action="LeaveAccount" method="post">
+                    <button class="btn btn-sm work-outline" type="submit" aria-label="ออกจากระบบ" title="ออกจากระบบ">
+                        <partial name="_UiIcon" model="@("exit")" />
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </header>
+}
+else
+{
+    var expandClass = isAdmin ? "navbar-expand-xxl" : !hasAccount ? "navbar-expand-md" : "navbar-expand-xl";
+
+    <header class="site-header">
+        <nav class="navbar @expandClass site-navbar" aria-label="เมนูหลัก">
+            <div class="site-nav-frame">
+                <div class="site-nav-brand-group">
+                    @if (isAdmin)
+                    {
+                        <button class="admin-menu-toggle d-lg-none" type="button" data-bs-toggle="offcanvas"
+                                data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="เปิดเมนูผู้ดูแลระบบ">
+                            <svg class="nav-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                        </button>
+                    }
+                    <a class="site-nav-brand" asp-controller="Home" asp-action="Index">
+                        <span class="site-nav-mark">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h13v5a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V9Zm13 1h2a3 3 0 0 1 0 6h-2M3 22h16M7 6V3m5 3V3"/></svg>
+                        </span>
+                        <span>Café &amp; Photo Studio</span>
+                    </a>
+                </div>
+
+                <button class="navbar-toggler site-nav-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#siteNavContent" aria-controls="siteNavContent" aria-expanded="false" aria-label="เปิดเมนูหลัก">
+                    <svg class="nav-menu-icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                </button>
+
+                <div class="collapse navbar-collapse site-nav-collapse" id="siteNavContent">
+                    <ul class="navbar-nav site-nav-links" data-nav-indicator="storefront">
+                        @foreach (var item in hasAccount ? publicLinks : publicLinks.Take(1))
+                        {
+                            <li>
+                                <a class="site-nav-link" asp-controller="@item.Controller" asp-action="@item.Action" asp-fragment="@item.Fragment"
+                                   data-nav-key="@(item.Controller + "/" + item.Action)"
+                                   aria-current="@(controller == item.Controller && action == item.Action ? (item.Fragment is null ? "page" : "location") : null)">
+                                    <span data-nav-label>@item.Label</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav site-nav-actions">
+                        @if (hasAccount)
+                        {
+                            <li>
+                                    <a class="site-nav-button site-nav-primary" asp-controller="Booking" asp-action="Table"
+                                       aria-current="@(controller == "Booking" && action == "Table" ? "page" : null)">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v15H4zM8 3v6m8-6v6M4 11h16"/></svg>
+                                        จองโต๊ะ
+                                    </a>
+                            </li>
+                            <li>
+                                <span class="site-nav-account" title="@displayName">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2M8 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"/></svg>
+                                    <span>@displayName<small>@(isAdmin ? "ผู้ดูแลระบบ" : package)</small></span>
+                                </span>
+                            </li>
+                            <li>
+                                <form asp-controller="Account" asp-action="LeaveAccount" method="post">
+                                    <button class="site-nav-button" type="submit" title="ออกจากระบบ" aria-label="ออกจากระบบ">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h6m4-13 5 5-5 5m5-5H8"/></svg>
+                                        <span>ออกจากระบบ</span>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li><a class="site-nav-button" asp-controller="Account" asp-action="Login">เข้าสู่ระบบ</a></li>
+                            <li><a class="site-nav-button site-nav-primary" asp-controller="Account" asp-action="Register">สมัครสมาชิก</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+}

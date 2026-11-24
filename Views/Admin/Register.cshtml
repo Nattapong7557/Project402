@@ -1,0 +1,84 @@
+@model Nattapong_7379_L002.ViewModel.AdminAddUserViewModel
+@{
+    ViewData["Title"] = "เพิ่มบัญชีผู้ใช้";
+}
+
+<section class="ff-admin-page cafe-account-editor" aria-labelledby="add-user-title">
+    <header class="ff-admin-heading">
+        <div>
+            <h1 id="add-user-title">@ViewData["Title"]</h1>
+            <p>กรอกข้อมูลและเลือกบทบาทสำหรับบัญชีใหม่</p>
+        </div>
+    </header>
+
+    <form class="cafe-admin-form" asp-action="Register" method="post">
+        <div asp-validation-summary="ModelOnly" class="ff-validation" role="alert"></div>
+
+        <fieldset class="cafe-form-section">
+            <legend>ข้อมูลบัญชี</legend>
+            <div class="cafe-form-grid">
+                <div class="cafe-field">
+                    <label asp-for="Name">ชื่อ–นามสกุล</label>
+                    <input asp-for="Name" class="form-control" autocomplete="name" required aria-describedby="name-error" />
+                    <span asp-validation-for="Name" id="name-error"></span>
+                </div>
+                <div class="cafe-field">
+                    <label asp-for="Username">ชื่อผู้ใช้</label>
+                    <input asp-for="Username" class="form-control" autocomplete="username" required aria-describedby="username-error" />
+                    <span asp-validation-for="Username" id="username-error"></span>
+                </div>
+                <div class="cafe-field">
+                    <label asp-for="Email">อีเมล</label>
+                    <input asp-for="Email" class="form-control" type="email" autocomplete="email" placeholder="name@example.com" required aria-describedby="email-error" />
+                    <span asp-validation-for="Email" id="email-error"></span>
+                </div>
+                <div class="cafe-field">
+                    <label asp-for="PhoneNumber">เบอร์โทรศัพท์</label>
+                    <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" required aria-describedby="phone-error" />
+                    <span asp-validation-for="PhoneNumber" id="phone-error"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="cafe-form-section">
+            <legend>รหัสผ่าน</legend>
+            <div class="cafe-form-grid">
+                <div class="cafe-field">
+                    <label asp-for="Password">รหัสผ่าน</label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" required minlength="8" aria-describedby="password-hint password-error" />
+                    <small id="password-hint">อย่างน้อย 8 ตัวอักษร</small>
+                    <span asp-validation-for="Password" id="password-error"></span>
+                </div>
+                <div class="cafe-field">
+                    <label asp-for="ConfirmPassword">ยืนยันรหัสผ่าน</label>
+                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" required aria-describedby="confirm-password-error" />
+                    <span asp-validation-for="ConfirmPassword" id="confirm-password-error"></span>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="cafe-form-section">
+            <div class="cafe-field cafe-role-field">
+                <label asp-for="RoleId">บทบาท</label>
+                <select asp-for="RoleId" class="form-select" required aria-describedby="role-hint role-error">
+                    <option value="">เลือกบทบาท</option>
+                    @foreach (var role in Model.Roles)
+                    {
+                        <option value="@role.Id">@role.Name</option>
+                    }
+                </select>
+                <small id="role-hint">บทบาทกำหนดหน้าที่และสิทธิ์เข้าถึงของบัญชี</small>
+                <span asp-validation-for="RoleId" id="role-error"></span>
+            </div>
+        </div>
+
+        <div class="cafe-form-actions">
+            <a class="cafe-button cafe-button-outline" asp-action="Index">กลับไปรายชื่อผู้ใช้</a>
+            <button class="cafe-button cafe-button-dark" type="submit">สร้างบัญชี</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,125 @@
+@using Nattapong_7379_L002.Services.FoodOrdering
+@using Nattapong_7379_L002.Models.FoodOrdering
+@using Nattapong_7379_L002.ViewModel.FoodOrdering
+@model FoodStaffViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var sections = FoodOrderSections.ForStaff(Model);
+    var isAccounting = Model.Workspace == "Accounting";
+    var description = Model.Workspace switch
+    {
+        "Cashier" => "ยืนยันออเดอร์ให้ครัวและบันทึกเมื่อส่งอาหารถึงโต๊ะ",
+        "Kitchen" => "ดูรายการและจำนวนจากออเดอร์ที่แคชเชียร์ยืนยันแล้ว",
+        _ => "ตรวจยอดสุทธิ ยืนยันชำระเงินจำลอง และดูบิลที่ชำระแล้ว"
+    };
+}
+
+<section class="work-page food-staff">
+    <header class="work-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div><h1>@Model.Title</h1><p>@description</p></div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            @if (isAccounting)
+            {
+                <a class="btn work-outline" asp-controller="Accounting" asp-action="Records">รายการบัญชีอื่น</a>
+            }
+            else if (Model.Workspace is "Kitchen" or "Cashier")
+            {
+                <a class="btn work-outline" asp-controller="@Model.Workspace" asp-action="Bookings">รายการจองโต๊ะ</a>
+            }
+            <a class="btn work-outline" asp-controller="FoodStaff" asp-action="@Model.Workspace">
+                <partial name="_UiIcon" model="@("refresh")" /> อัปเดตคิว
+            </a>
+        </div>
+    </header>
+    <partial name="~/Views/FoodOrder/_Messages.cshtml" />
+    @if (Model.Profit is { } profit)
+    {
+        <partial name="_MonthlyProfit" model="profit" />
+    }
+    @if (Model.Membership is { } membership)
+    {
+        <div class="accounting-revenue-grid mb-4">
+            <section class="card work-revenue h-100" aria-labelledby="cafe-revenue-title">
+                <div class="work-revenue-heading">
+                    <span class="work-icon"><partial name="_UiIcon" model="@("bill")" /></span>
+                    <h2 id="cafe-revenue-title">ยอดขายคาเฟ่สะสม</h2>
+                </div>
+                <p class="work-revenue-amount"><span>฿</span>@Model.PaidRevenue.ToString("N2")</p>
+                <p class="work-revenue-note">จากบิลอาหารที่ยืนยันชำระแล้ว</p>
+            </section>
+            <section class="card work-revenue h-100" aria-labelledby="member-revenue-title">
+                <div class="work-revenue-heading">
+                    <span class="work-icon"><partial name="_UiIcon" model='"check"' /></span>
+                    <h2 id="member-revenue-title">รายรับสมาชิกสะสม</h2>
+                </div>
+                <p class="work-revenue-amount"><span>฿</span>@membership.Total.ToString("N2")</p>
+                <p class="work-revenue-note">เดือนนี้ ฿@membership.MonthlyTotal.ToString("N2")</p>
+                <a class="btn work-outline align-self-start mt-3" asp-controller="MembershipRevenue" asp-action="Index">
+                    ดูรายการรับเงิน
+                </a>
+            </section>
+        </div>
+        <section class="card work-panel mb-4" aria-labelledby="latest-member-payments">
+            <h2 class="h5 mb-3" id="latest-member-payments">รายรับสมาชิกล่าสุด</h2>
+            @if (membership.Payments.Count == 0)
+            {
+                <p class="work-empty mb-0">ยังไม่มีรายการรับเงินค่าสมาชิก</p>
+            }
+            else
+            {
+                <ul class="work-list list-unstyled mb-0">
+                    @foreach (var payment in membership.Payments)
+                    {
+                        <li class="work-row">
+                            <div>
+                                <strong class="text-break">@payment.MemberName</strong>
+                                <p class="small text-muted mb-0">@payment.Package · @FoodPricing.BangkokTime(payment.PaidAt).ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                            <strong class="text-nowrap">฿@payment.Amount.ToString("N2")</strong>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+    @foreach (var group in sections)
+    {
+        <section class="food-order-section" aria-labelledby="@group.Key">
+            <div class="food-section-head d-flex align-items-center gap-3">
+                <span class="food-section-icon"><partial name="_UiIcon" model="group.Icon" /></span>
+                <h2 class="h5 m-0" id="@group.Key">@group.Title</h2>
+                <span class="badge food-count">@group.Orders.Count</span>
+            </div>
+            @if (group.Orders.Count == 0)
+            {
+                <p class="food-empty mb-0">@group.EmptyMessage</p>
+            }
+            else
+            {
+                <div class="food-ticket-grid">
+                    @foreach (var order in group.Orders)
+                    {
+                        var (action, label) = order.Status switch
+                        {
+                            FoodOrderStatus.Submitted => ("Accept", "ยืนยันส่งครัว"),
+                            FoodOrderStatus.Ready => ("Serve", "เสิร์ฟแล้ว"),
+                            FoodOrderStatus.InKitchen => ("MarkReady", "ทำเสร็จ"),
+                            FoodOrderStatus.AwaitingPayment => ("Pay", "ยืนยันชำระเงินจำลอง"),
+                            _ => (null, null)
+                        };
+                        <article class="card food-ticket">
+                            <partial name="~/Views/FoodOrder/_OrderSummary.cshtml" model="@(new FoodTicketViewModel(order, isAccounting))" />
+                            @if (action is not null)
+                            {
+                                <form asp-controller="FoodStaff" asp-action="@action" method="post" class="mt-3">
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <button class="btn food-button" type="submit">@label</button>
+                                </form>
+                            }
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+    }
+</section>

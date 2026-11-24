@@ -1,0 +1,47 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var navigation = new (string Action, string Label, string Icon)[]
+    {
+        ("Index", "สั่งอาหาร", "food"), ("Orders", "ออเดอร์", "orders"), ("Bills", "เช็คบิล", "bill")
+    };
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Café &amp; Photo Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/food-ordering.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/motion.css" asp-append-version="true" />
+</head>
+<body class="food-ordering-page">
+    <header class="food-header">
+        <div class="food-frame food-header-inner">
+            <a class="food-brand" asp-controller="FoodOrder" asp-action="Index">
+                Café &amp; Photo Studio <span>สั่งอาหารที่โต๊ะ</span>
+            </a>
+            <nav class="food-icon-nav d-flex" data-nav-indicator="food" aria-label="เมนูสั่งอาหาร">
+                @foreach (var item in navigation)
+                {
+                    <a class="food-icon-link" asp-controller="FoodOrder" asp-action="@item.Action" data-nav-key="@item.Action"
+                       aria-current="@(action == item.Action ? "page" : null)" aria-label="@item.Label" title="@item.Label">
+                        <span data-nav-label><partial name="_UiIcon" model="item.Icon" /></span>
+                    </a>
+                }
+            </nav>
+            <a class="food-icon-link food-home-link" asp-controller="Home" asp-action="Index"
+               aria-label="กลับหน้าร้านออนไลน์" title="กลับหน้าร้านออนไลน์"><partial name="_UiIcon" model="@("home")" /></a>
+        </div>
+    </header>
+    <main class="food-frame food-main page-enter">
+        <partial name="~/Views/FoodOrder/_Messages.cshtml" />
+        @RenderBody()
+    </main>
+    <script type="module" src="~/js/navbar-indicator.mjs" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

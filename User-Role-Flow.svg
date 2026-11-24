@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="940" viewBox="0 0 1280 940" role="img" aria-labelledby="title description">
+  <title id="title">Flow ความสัมพันธ์ผู้ใช้และ Role</title>
+  <desc id="description">ภาพอธิบายตาราง users เชื่อม staff เชื่อม roles และขั้นตอนตรวจสิทธิ์ Admin</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#65758b"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Tahoma, sans-serif; fill: #253247; }
+      .title { font-size: 32px; font-weight: 700; }
+      .subtitle { font-size: 17px; fill: #66758a; }
+      .card-title { font-size: 23px; font-weight: 700; }
+      .field { font-size: 16px; }
+      .small { font-size: 14px; fill: #66758a; }
+      .section { font-size: 21px; font-weight: 700; }
+      .step-title { font-size: 17px; font-weight: 700; }
+      .step-text { font-size: 15px; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="940" fill="#f5f7fb"/>
+  <text x="64" y="68" class="title">ผู้ใช้และ Role ทำงานร่วมกันอย่างไร?</text>
+  <text x="64" y="101" class="subtitle">ตาราง staff เป็นตัวกลางเชื่อมบัญชี users เข้ากับ roles ตามโครงสร้างฐานข้อมูลของโปรเจกต์</text>
+
+  <text x="64" y="158" class="section">1. ความสัมพันธ์ในฐานข้อมูล</text>
+
+  <rect x="72" y="192" width="310" height="236" rx="16" fill="#ffffff" stroke="#9bb8e8" stroke-width="2"/>
+  <rect x="72" y="192" width="310" height="54" rx="16" fill="#e8f0ff"/>
+  <path d="M72 230 v16 h310 v-16" fill="#e8f0ff"/>
+  <text x="98" y="228" class="card-title">users</text>
+  <text x="98" y="281" class="field">🔑 id (Primary Key)</text>
+  <text x="98" y="314" class="field">name</text>
+  <text x="98" y="347" class="field">username</text>
+  <text x="98" y="380" class="field">email</text>
+  <text x="98" y="413" class="field">phone_number</text>
+
+  <rect x="485" y="192" width="310" height="236" rx="16" fill="#ffffff" stroke="#e9bd77" stroke-width="2"/>
+  <rect x="485" y="192" width="310" height="54" rx="16" fill="#fff2dc"/>
+  <path d="M485 230 v16 h310 v-16" fill="#fff2dc"/>
+  <text x="511" y="228" class="card-title">staff</text>
+  <text x="511" y="281" class="field">🔑 id (Primary Key)</text>
+  <text x="511" y="314" class="field">user_id (FK, unique)</text>
+  <text x="511" y="347" class="field">role_id (FK)</text>
+  <text x="511" y="380" class="field">status</text>
+  <text x="511" y="413" class="small">ชื่อ staff มาจากการออกแบบ schema</text>
+
+  <rect x="898" y="192" width="310" height="236" rx="16" fill="#ffffff" stroke="#8ac8a2" stroke-width="2"/>
+  <rect x="898" y="192" width="310" height="54" rx="16" fill="#e5f6eb"/>
+  <path d="M898 230 v16 h310 v-16" fill="#e5f6eb"/>
+  <text x="924" y="228" class="card-title">roles</text>
+  <text x="924" y="281" class="field">🔑 id (Primary Key)</text>
+  <text x="924" y="314" class="field">name</text>
+  <text x="924" y="359" class="small">ตัวอย่าง Role:</text>
+  <text x="924" y="386" class="field">User · Admin · Cashiers...</text>
+
+  <line x1="382" y1="307" x2="474" y2="307" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="395" y="286" class="small">id = user_id</text>
+  <text x="390" y="339" class="small">1 : 0..1</text>
+
+  <line x1="795" y1="307" x2="887" y2="307" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="806" y="286" class="small">role_id = id</text>
+  <text x="814" y="339" class="small">หลาย staff : 1 role</text>
+
+  <rect x="72" y="451" width="1136" height="64" rx="12" fill="#fff8e9" stroke="#f0d99d"/>
+  <text x="96" y="478" class="step-title">จำง่าย ๆ</text>
+  <text x="96" y="501" class="step-text">users เก็บบัญชี · staff ผูกบัญชีกับ Role · roles เก็บชื่อสิทธิ์ — staff ในระบบนี้จึงทำหน้าที่เป็นตารางเชื่อม ไม่ได้แปลว่าทุกบัญชีเป็นพนักงาน</text>
+
+  <text x="64" y="573" class="section">2. Flow การสมัครสมาชิกและ Login</text>
+  <rect x="72" y="599" width="330" height="90" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="96" y="633" class="step-title">สมัครสมาชิก</text>
+  <text x="96" y="661" class="step-text">บันทึกข้อมูลบัญชีลง users</text>
+  <line x1="402" y1="644" x2="479" y2="644" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="490" y="599" width="330" height="90" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="514" y="633" class="step-title">Login สำเร็จ</text>
+  <text x="514" y="661" class="step-text">เก็บ AccountId และ Role ใน Session</text>
+  <line x1="820" y1="644" x2="897" y2="644" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="908" y="599" width="300" height="90" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="932" y="633" class="step-title">เข้าสู่ระบบ</text>
+  <text x="932" y="661" class="step-text">Role ปกติใช้งานส่วนทั่วไป</text>
+
+  <text x="64" y="746" class="section">3. Flow ตรวจสิทธิ์หน้า Admin</text>
+  <rect x="72" y="771" width="250" height="100" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="92" y="808" class="step-title">เปิดหน้า Admin</text>
+  <text x="92" y="838" class="step-text">อ่าน AccountId จาก Session</text>
+  <line x1="322" y1="821" x2="364" y2="821" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <rect x="375" y="771" width="350" height="100" rx="14" fill="#fff2dc" stroke="#e9bd77" stroke-width="2"/>
+  <text x="397" y="808" class="step-title">ตรวจฐานข้อมูล</text>
+  <text x="397" y="838" class="step-text">AccountId → staff.user_id → roles.name</text>
+  <line x1="725" y1="821" x2="764" y2="821" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <polygon points="830,771 895,821 830,871 765,821" fill="#ffffff" stroke="#9aa8ba" stroke-width="2"/>
+  <text x="807" y="817" class="step-title">Role?</text>
+  <text x="800" y="838" class="small">ตรวจชื่อ Role</text>
+
+  <path d="M895 808 H948 V788 H990" fill="none" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="923" y="798" class="small">Admin</text>
+  <rect x="1001" y="756" width="207" height="70" rx="14" fill="#e5f6eb" stroke="#8ac8a2" stroke-width="2"/>
+  <text x="1022" y="786" class="step-title">อนุญาต</text>
+  <text x="1022" y="811" class="step-text">ใช้ฟังก์ชัน Admin</text>
+
+  <path d="M895 834 H948 V876 H990" fill="none" stroke="#65758b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="911" y="866" class="small">Role อื่น</text>
+  <rect x="1001" y="844" width="207" height="70" rx="14" fill="#fce9e7" stroke="#e3a6a0" stroke-width="2"/>
+  <text x="1022" y="874" class="step-title">ปฏิเสธ</text>
+  <text x="1022" y="899" class="step-text">กลับหน้าหลัก</text>
+
+  <text x="72" y="931" class="small">การซ่อนเมนูช่วยเรื่องหน้าจอ แต่ Controller ยังตรวจ Role จากฐานข้อมูลทุกครั้งเพื่อป้องกันการเข้าถึงโดยตรง</text>
+</svg>

@@ -1,0 +1,96 @@
+﻿@model List<Nattapong_7379_L002.Models.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Owner - DashBoard";
+    int usersCount = ViewBag.UsersCount ?? 0;
+    int servicesCount = ViewBag.ServicesCount ?? 0;
+}
+
+<div class="ff-role-workspace p-4 bg-white rounded-4 shadow-sm">
+    <!-- Top Header with Pink Logout Button matching Figma -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <span class="badge bg-dark text-white mb-1">EXECUTIVE VIEW</span>
+            <h3 class="fw-bold m-0">Owner - DashBoard</h3>
+            <p class="text-muted small m-0">ดูภาพรวมธุรกิจ ผลประกอบการ และสถิติการใช้บริการทั้งหมด</p>
+        </div>
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post" class="m-0">
+            <button type="submit" class="btn px-4 py-2 fw-bold rounded-3" style="background:#ff9aa2; color:#4a1c1c; border:none;">
+                Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Top 4 KPI Square Cards matching Figma -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-4 text-center h-100 d-flex flex-column justify-content-center" style="background:#e0e0e0; min-height:110px;">
+                <div class="small text-muted fw-bold">รายได้รวมเดือนนี้</div>
+                <div class="fs-4 fw-bold text-success mt-1">฿84,900</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-4 text-center h-100 d-flex flex-column justify-content-center" style="background:#e0e0e0; min-height:110px;">
+                <div class="small text-muted fw-bold">จำนวนการจองทั้งหมด</div>
+                <div class="fs-4 fw-bold text-dark mt-1">@Model.Count รายการ</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-4 text-center h-100 d-flex flex-column justify-content-center" style="background:#e0e0e0; min-height:110px;">
+                <div class="small text-muted fw-bold">สมาชิกในระบบ</div>
+                <div class="fs-4 fw-bold text-primary mt-1">@usersCount บัญชี</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded-4 text-center h-100 d-flex flex-column justify-content-center" style="background:#e0e0e0; min-height:110px;">
+                <div class="small text-muted fw-bold">แพ็กเกจ &amp; บริการ</div>
+                <div class="fs-4 fw-bold text-dark mt-1">@servicesCount รายการ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Layout: Left 2 stacked wide panels + Right tall panel with circle chart matching Figma -->
+    <div class="row g-3">
+        <div class="col-md-8 d-flex flex-column gap-3">
+            <div class="p-4 rounded-4 flex-fill" style="background:#e0e0e0; min-height:130px;">
+                <h6 class="fw-bold mb-2">สรุปผลประกอบการรายสัปดาห์ (Café &amp; Photo Studio)</h6>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar bg-success" style="width: 75%">ยอดจองสตูดิโอ 75%</div>
+                </div>
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar bg-warning text-dark" style="width: 60%">ยอดขายเครื่องดื่มคาเฟ่ 60%</div>
+                </div>
+            </div>
+            <div class="p-4 rounded-4 flex-fill" style="background:#e0e0e0; min-height:130px;">
+                <h6 class="fw-bold mb-2">รายการจองล่าสุดในระบบ</h6>
+                @if (!Model.Any())
+                {
+                    <p class="small text-muted mb-0">ยังไม่มีรายการจองใหม่ในขณะนี้</p>
+                }
+                else
+                {
+                    @foreach (var b in Model.Take(3))
+                    {
+                        <div class="small d-flex justify-content-between border-bottom border-secondary-subtle py-1">
+                            <span><strong>@b.ServiceType:</strong>@b.ItemName</span>
+                            <span class="text-muted">@b.BookingDate (@b.Status)</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between align-items-center text-center" style="background:#e0e0e0;">
+                <div>
+                    <h6 class="fw-bold mb-1">สัดส่วนรายได้ตามบริการ</h6>
+                    <p class="small text-muted">Studio vs Café</p>
+                </div>
+                <div class="rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm my-2" style="width:140px; height:140px; background:#9e9595; color:#fff;">
+                    <span class="fw-bold fs-4">68%</span>
+                    <span class="small">Photo Studio</span>
+                </div>
+                <div class="small text-muted">อัปเดตข้อมูลแบบ Real-time</div>
+            </div>
+        </div>
+    </div>
+</div>

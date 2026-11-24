@@ -1,0 +1,128 @@
+@using Nattapong_7379_L002.Services
+@model Nattapong_7379_L002.ViewModel.TableBookingViewModel
+
+@{
+    ViewData["Title"] = "จองโต๊ะที่คาเฟ่";
+    var selectedZone = TableReservationRules.FindZone(Model.ItemName) ?? TableReservationRules.Zones[0];
+}
+
+@section StorefrontHero {
+    <partial name="_StorefrontHero" model='("จองโต๊ะที่คาเฟ่", "เลือกมุมโปรดจากผังร้าน แล้วจองรอบที่สะดวก", "~/images/header-table.webp")' />
+}
+
+<div class="table-booking-page" data-table-booking data-availability-url="@Url.Action("TableAvailability", "Booking")">
+    @if (string.Equals(Context.Session.GetString("AccountRole"), "Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        <div class="table-booking-admin">
+            <a class="btn table-booking-link" asp-controller="Admin" asp-action="Bookings">
+                <partial name="_UiIcon" model='"orders"' /> จัดการรายการจอง
+            </a>
+        </div>
+    }
+    @if ((ViewData["TableError"] ?? TempData["BookingError"]) is string error)
+    {
+        <p class="alert alert-danger" role="alert">@error</p>
+    }
+
+    <div class="table-booking-layout">
+        <section class="table-booking-panel" aria-labelledby="seating-title">
+            <div class="table-booking-heading">
+                <span class="table-booking-icon"><partial name="_UiIcon" model='"home"' /></span>
+                <div>
+                    <h2 id="seating-title">ผังที่นั่งในร้าน</h2>
+                    <p>เลือกมุมโปรดจาก 5 โซน</p>
+                </div>
+            </div>
+            <figure class="table-seating-map">
+                <img src="~/images/cafe-seating-plan.png" asp-append-version="true" alt="ผังร้าน 3D แสดง Zone A ถึง D และ Bar Zone" />
+            </figure>
+            <div class="table-zone-grid" role="group" aria-label="เลือกโซนบนผังที่นั่ง">
+                @foreach (var zone in TableReservationRules.Zones)
+                {
+                    <button class="table-zone" type="button" data-seat-zone="@zone.BookingName" data-zone-key="@zone.Key"
+                            data-zone-title="@zone.Label · @zone.Name" aria-pressed="@(selectedZone.Key == zone.Key ? "true" : "false")">
+                        <span class="table-zone-label">@zone.Label</span>
+                        <span class="table-zone-selected" aria-hidden="true"><partial name="_UiIcon" model='"check"' /></span>
+                        <strong>@zone.Name</strong>
+                        <span class="table-zone-description">@zone.Description</span>
+                        <span class="table-zone-capacity"><partial name="_UiIcon" model='"team"' /> @zone.Capacity</span>
+                    </button>
+                }
+            </div>
+            <a class="btn table-booking-link table-booking-jump" href="#table-booking-details">ไปยังฟอร์มจอง <partial name="_UiIcon" model='"arrow"' /></a>
+        </section>
+
+        <section class="table-booking-panel table-booking-details" id="table-booking-details" aria-labelledby="table-form-title">
+            <div class="table-booking-heading">
+                <span class="table-booking-icon"><partial name="_UiIcon" model='"calendar"' /></span>
+                <div>
+                    <h2 id="table-form-title">รายละเอียดการจอง</h2>
+                    <p>เลือกรอบว่างในวันที่ต้องการ</p>
+                </div>
+            </div>
+            <div class="table-selection">
+                <span>โซนที่เลือก</span>
+                <strong data-seat-summary>@selectedZone.Label · @selectedZone.Name</strong>
+            </div>
+
+            <form asp-controller="Booking" asp-action="Book" method="post" data-table-form>
+                <input type="hidden" asp-for="ServiceType" />
+                <div class="mb-3">
+                    <label class="form-label" asp-for="ItemName">โซนที่นั่ง</label>
+                    <select asp-for="ItemName" class="form-select" required>
+                        @foreach (var zone in TableReservationRules.Zones)
+                        {
+                            <option value="@zone.BookingName" data-zone-key="@zone.Key">@zone.Label · @zone.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="table-visit-grid mb-3">
+                    <div>
+                        <label class="form-label" asp-for="BookingDate">วันที่เข้าใช้บริการ</label>
+                        <input asp-for="BookingDate" type="date" min="@Model.MinimumDate" class="form-control" required />
+                    </div>
+                    <div>
+                        <label class="form-label" asp-for="GuestCount">จำนวนคน</label>
+                        <input asp-for="GuestCount" type="number" min="1" max="15" class="form-control" required />
+                    </div>
+                </div>
+
+                <fieldset class="table-slot-fieldset mb-3" aria-describedby="table-availability-status">
+                    <legend>รอบเวลา</legend>
+                    <p class="table-availability-status" id="table-availability-status" role="status" data-availability-status>
+                        @(Model.Unavailable.Count == TableReservationRules.Slots.Count ? "วันที่เลือกไม่มีรอบว่างในโซนนี้" : "เลือกจากรอบที่ว่างด้านล่าง")
+                    </p>
+                    <div class="table-slot-grid">
+                        @for (var index = 0; index < TableReservationRules.Slots.Count; index++)
+                        {
+                            var slot = TableReservationRules.Slots[index];
+                            var unavailable = Model.Unavailable.Contains(slot.Value);
+                            <label class="table-slot">
+                                <input asp-for="TimeSlot" type="radio" id="table-slot-@index" value="@slot.Value" disabled="@unavailable" required />
+                                <span class="table-slot-text">
+                                    <strong>@slot.Value</strong>
+                                    <small>@slot.Label</small>
+                                </span>
+                                <span class="table-slot-status" data-slot-status>@(unavailable ? "ไม่ว่าง" : "ว่าง")</span>
+                            </label>
+                        }
+                    </div>
+                </fieldset>
+
+                <div class="mb-4">
+                    <label class="form-label" asp-for="Note">หมายเหตุ <small>(ถ้ามี)</small></label>
+                    <textarea asp-for="Note" class="form-control" rows="2" placeholder="เช่น ต้องการเก้าอี้เสริม"></textarea>
+                </div>
+                <button type="submit" class="btn table-confirm-button" data-table-submit>
+                    ยืนยันการจอง <partial name="_UiIcon" model='"arrow"' />
+                </button>
+                <p class="table-confirm-hint">ระบบกันรอบที่เลือกไว้ระหว่างรอพนักงานอนุมัติ</p>
+            </form>
+            <p class="table-booking-contact">สอบถามหรือจองเหมาโซนทาง LINE <strong>@@cafephotostudio</strong></p>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/table-booking.mjs" asp-append-version="true"></script>
+}

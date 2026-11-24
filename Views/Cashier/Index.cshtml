@@ -1,0 +1,95 @@
+@using Nattapong_7379_L002.Services
+@model Nattapong_7379_L002.ViewModel.CashierViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "แคชเชียร์ · รายการจองโต๊ะ";
+}
+
+<div class="ff-role-workspace">
+    <!-- Top Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--ff-theme-border-soft) !important;">
+        <div>
+            <h1 class="ff-role-header-title">รายการจองโต๊ะและการชำระเงิน</h1>
+            <a class="cafe-button cafe-button-dark" asp-controller="FoodStaff" asp-action="Cashier">ออเดอร์อาหารที่โต๊ะ</a>
+        </div>
+    </div>
+
+    <!-- ฟอร์มเปิดโต๊ะ/รับออเดอร์หน้าร้านใหม่ด้วย asp-controller, asp-action, asp-for -->
+    <div class="ff-workspace-form-card">
+        <div class="ff-workspace-form-title">เปิดโต๊ะ / รับออเดอร์ใหม่หน้าร้าน</div>
+        <form asp-controller="Cashier" asp-action="CreateOrder" method="post" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label asp-for="NewTableItemName" class="form-label">โซนโต๊ะ / รายการออเดอร์</label>
+                <input asp-for="NewTableItemName" class="form-control" placeholder="เช่น Table #5 - Matcha Latte x2, Croissant x1" required />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="NewTableGuestCount" class="form-label">จำนวนลูกค้า</label>
+                <input asp-for="NewTableGuestCount" type="number" min="1" max="15" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label asp-for="NewTableNote" class="form-label">หมายเหตุ</label>
+                <input asp-for="NewTableNote" class="form-control" placeholder="เช่น หวานน้อย, ชำระเงินสด" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn ff-btn-submit-olive w-100">บันทึกออเดอร์</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Pills (Minimalist Classic Capsules) -->
+    <div class="ff-pill-filter-bar">
+        <span class="ff-pill-filter-item ff-pill-filter-active">โต๊ะที่เปิดอยู่ (@Model.OpenTablesCount)</span>
+        <span class="ff-pill-filter-item ff-pill-filter-secondary">ชำระเงินแล้ว (@Model.PaidTablesCount)</span>
+    </div>
+
+    <!-- Table Cards Grid -->
+    <div class="row g-4">
+        @if (Model.Bookings.Count == 0)
+        {
+            <div class="col-12">
+                <div class="p-5 text-center rounded-4 border bg-white" style="border-color: var(--ff-theme-border-soft) !important;">
+                    <h5 class="fw-bold mb-1" style="color: var(--ff-theme-brown-deep);">ยังไม่มีรายการโต๊ะที่เปิดอยู่ในขณะนี้</h5>
+                    <p class="small text-muted mb-0">สามารถกรอกฟอร์มด้านบนเพื่อเปิดโต๊ะใหม่หรือรับออเดอร์หน้าร้านได้ทันที</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model.Bookings)
+            {
+                var next = TableBookingWorkflow.NextForCashier(item);
+                <div class="col-md-6 col-lg-3">
+                    <div class="ff-card-workspace">
+                        <div class="ff-card-workspace-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="ff-card-workspace-title">จองโต๊ะ #@item.Id</span>
+                                <span class="ff-card-workspace-badge-green">@item.Status</span>
+                            </div>
+                            <div class="fw-bold mb-1" style="color: var(--ff-theme-brown-deep); font-size: 0.95rem;">@item.ItemName</div>
+                            <div class="small text-muted mb-1">ลูกค้า: @(item.User?.Name ?? "Walk-in") (@item.GuestCount ท่าน)</div>
+                            <div class="small text-muted">เวลา: @item.BookingDate (@item.TimeSlot)</div>
+                            @if (!string.IsNullOrEmpty(item.Note))
+                            {
+                                <div class="small mt-2 p-2 rounded-2" style="background: var(--ff-theme-cream-alt); color: var(--ff-theme-brown-main);">
+                                    <strong>หมายเหตุ:</strong> @item.Note
+                                </div>
+                            }
+                        </div>
+                        @if (next is not null)
+                        {
+                            <div class="ff-card-workspace-actions">
+                                <form asp-controller="Cashier" asp-action="UpdateStatus" method="post" class="flex-fill m-0">
+                                    <input type="hidden" name="SelectedBookingId" value="@item.Id" />
+                                    <input type="hidden" name="NewStatus" value="@next" />
+                                    <button type="submit" class="btn ff-btn-card-action ff-btn-card-complete w-100">
+                                        @(next == "Paid" ? "รับชำระเงิน" : "ปิดโต๊ะ")
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

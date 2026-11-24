@@ -1,0 +1,129 @@
+﻿@model Nattapong_7379_L002.ViewModel.RegisterStep2ViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "เลือกแพ็กเกจสมาชิก - ขั้นตอนที่ 2";
+}
+
+<!-- Floating Back to Step 1 Pill -->
+<a class="ff-auth-back-pill" asp-controller="Account" asp-action="Register" title="ย้อนกลับไปแก้ไขข้อมูล">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    <span>ย้อนกลับไปขั้นตอนที่ 1</span>
+</a>
+
+<div class="ff-auth-outer">
+    <section class="ff-auth-card ff-auth-card-wide">
+        <!-- 1. Left Visual Side -->
+        <div class="ff-auth-visual">
+            <img class="ff-auth-image" src="~/images/cafe-auth.jpg" asp-append-version="true" alt="Café & photo Studio" />
+            <div class="ff-auth-visual-overlay"></div>
+            <div class="ff-auth-copy">
+                <span class="ff-auth-tag">STEP 2 OF 3 &bull; CHOOSE PACKAGE</span>
+                <h2>ยกระดับประสบการณ์ของคุณ</h2>
+                <p>เลือกแพ็กเกจที่เหมาะกับคุณ เพื่อปลดล็อกการบริการสตูดิโอ ช่างแต่งหน้า ช่างภาพ และการจองโต๊ะมุมโปรด</p>
+                
+                <div class="ff-auth-perks">
+                    <div class="ff-perk-item">
+                        <span class="ff-perk-icon"></span>
+                        <span>แพ็กเกจ Premium เปิดใช้บริการจองของคาเฟ่และสตูดิโอ</span>
+                    </div>
+                    <div class="ff-perk-item">
+                        <span class="ff-perk-icon"></span>
+                        <span>ใช้บริการสตูดิโอถ่ายภาพแสงธรรมชาติได้ไม่อั้น</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Right Form Side: เลือกแพ็กเกจ -->
+        <div class="ff-auth-panel">
+            <!-- Step Indicator Bar -->
+            <div class="ff-step-progress mb-3">
+                <div class="ff-step-item done">
+                    <span class="ff-step-num"></span>
+                    <span class="ff-step-label">ข้อมูลบัญชี</span>
+                </div>
+                <div class="ff-step-line active"></div>
+                <div class="ff-step-item active">
+                    <span class="ff-step-num">2</span>
+                    <span class="ff-step-label">เลือกแพ็กเกจ</span>
+                </div>
+                <div class="ff-step-line"></div>
+                <div class="ff-step-item">
+                    <span class="ff-step-num">3</span>
+                    <span class="ff-step-label">ชำระเงิน</span>
+                </div>
+            </div>
+
+            <div class="ff-auth-header text-center text-md-start">
+                <span class="ff-auth-brand-badge">Café &amp; photo Studio</span>
+                <h1 class="ff-auth-title">เลือกแพ็กเกจสมาชิก</h1>
+                <p class="text-muted small">ขั้นตอนที่ 2: เลือกแพ็กเกจเพื่อรับสิทธิ์และเครื่องมือการจอง</p>
+            </div>
+
+            <form class="ff-auth-form" asp-controller="Account" asp-action="RegisterStep2" method="post">
+                @if (TempData["SignupPackageError"] is string packageError)
+                {
+                    <p class="alert alert-danger ff-auth-alert" role="alert">@packageError</p>
+                }
+
+                <div class="ff-packages-grid signup-packages" role="group" aria-label="แพ็กเกจสมาชิก">
+                    <!-- 1. Standard Package Card -->
+                    <label class="ff-package-card signup-package-unavailable" for="pkgStandard">
+                        <input type="radio" name="SelectedPackage" id="pkgStandard" value="Standard" class="visually-hidden" disabled aria-describedby="standard-availability" />
+                        <span class="signup-package-status" id="standard-availability">ยังไม่เปิดให้สมัคร</span>
+                        <div class="ff-pkg-header">
+                            <div>
+                                <span class="ff-pkg-name">Standard</span>
+                                <p class="ff-pkg-desc text-muted mb-0">ใช้งานพื้นฐาน</p>
+                            </div>
+                            <span class="ff-pkg-price">ฟรี</span>
+                        </div>
+                        <ul class="ff-pkg-features">
+                            <li><span class="text-success"></span>ดูเมนูอาหารและเครื่องดื่ม</li>
+                            <li><span class="text-success"></span>ดูข้อมูลโปรโมชั่นหน้าร้าน</li>
+                            <li class="text-muted"><span class="text-muted">&times;</span>ไม่สามารถจองช่างภาพ/ช่างแต่งหน้า</li>
+                            <li class="text-muted"><span class="text-muted">&times;</span>ไม่สามารถจองเช่าชุดสตูดิโอ</li>
+                        </ul>
+                    </label>
+
+                    <!-- 2. Premium Package Card (Recommended / Default as requested) -->
+                    <label class="ff-package-card ff-pkg-premium is-selected" for="pkgPremium">
+                        <input asp-for="SelectedPackage" type="radio" id="pkgPremium" value="Premium" class="visually-hidden" />
+                        <span class="signup-package-status"><partial name="_UiIcon" model='"check"' /> เลือกแล้ว</span>
+                        <div class="ff-pkg-header">
+                            <div>
+                                <span class="ff-pkg-name">Premium VIP</span>
+                                <p class="ff-pkg-desc text-muted mb-0">ปลดล็อกบริการจองคาเฟ่และสตูดิโอ</p>
+                            </div>
+                            <span class="ff-pkg-price text-success fw-bold">฿@Nattapong_7379_L002.Services.Membership.MembershipRules.PremiumPrice.ToString("N0") <small class="text-muted">ค่าสมัคร</small></span>
+                        </div>
+                        <ul class="ff-pkg-features">
+                            <li><span class="text-success fw-bold"></span><strong>จองคิวช่างแต่งหน้า &amp; ช่างภาพสตูดิโอ</strong></li>
+                            <li><span class="text-success fw-bold"></span><strong>จองเช่าชุดคอสตูม &amp; อุปกรณ์ถ่ายภาพ</strong></li>
+                            <li><span class="text-success fw-bold"></span><strong>จองโต๊ะและที่นั่งผัง 3D Isometric ล่วงหน้า</strong></li>
+                            <li><span class="text-success fw-bold"></span><strong>รับ Welcome Drink ฟรี &amp; ส่วนลด 10% ทุกเมนู</strong></li>
+                        </ul>
+                    </label>
+                </div>
+
+                <button class="ff-auth-btn-primary mt-3" type="submit">
+                    <span>ต่อไป: ขั้นตอนชำระเงิน (Step 3)</span>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a class="btn btn-link text-decoration-none text-muted p-0" asp-controller="Account" asp-action="Register">
+                        &larr; ย้อนกลับไปแก้ไขข้อมูล
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>

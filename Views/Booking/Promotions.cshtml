@@ -1,0 +1,90 @@
+@model List<Nattapong_7379_L002.Models.ServiceItem>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "โปรโมชั่นสมาชิก VIP - Exclusive Promotions";
+}
+
+@section StorefrontHero {
+    <partial name="_StorefrontHero" model='("โปรโมชันสำหรับสมาชิก", "เลือกแพ็กเกจคาเฟ่และถ่ายภาพสตูดิโอ", "~/images/header-promotions.webp")' />
+}
+
+<div class="ff-service-catalog-page py-3">
+
+    @if (string.Equals(Context.Session.GetString("AccountRole"), "Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a class="btn ff-btn-submit-olive rounded-pill px-4 shadow-sm" asp-controller="Admin" asp-action="CreateService" asp-route-type="Promotion">
+                + เพิ่มโปรโมชั่น
+            </a>
+            <a class="btn btn-outline-dark btn-sm rounded-pill px-3" asp-controller="Admin" asp-action="Services" asp-route-type="Promotion">
+                 ตารางจัดการโปรโมชั่นทั้งหมด
+            </a>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-4">
+            <h5>ยังไม่มีโปรโมชั่นในขณะนี้</h5>
+            <p class="mb-0">กรุณาติดตามข่าวสารเพื่อรับโปรโมชั่นสุดพิเศษ</p>
+        </div>
+    }
+    else
+    {
+        <partial name="_ServiceCards" model="Model" />
+    }
+</div>
+
+<!-- Modal ฟอร์มจองโปรโมชั่น -->
+<dialog class="cafe-service-dialog" id="serviceBookingModal" aria-labelledby="modalServiceTitle">
+    <div class="cafe-service-dialog-content">
+        <button class="ff-modal-close-btn" type="button" data-close-service-booking aria-label="ปิดหน้าต่างการจอง">&times;</button>
+        <div class="cafe-service-dialog-heading">
+            <h2 class="ff-modal-title" id="modalServiceTitle">จองโปรโมชั่นพิเศษ</h2>
+            <p class="text-muted small" id="modalServicePrice">฿0</p>
+        </div>
+
+        <form asp-controller="Booking" asp-action="Book" method="post">
+            <input type="hidden" name="ServiceType" id="modalServiceType" value="Promotion" />
+            <input type="hidden" name="ServiceItemId" id="modalServiceItemId" />
+            <input type="hidden" name="ItemName" id="modalItemName" value="" />
+
+            <div class="ff-form-group mb-3">
+                <p class="ff-form-label">โปรโมชั่นที่เลือก:</p>
+                <div class="p-2 bg-light rounded small fw-bold text-dark" id="modalItemDisplay"></div>
+            </div>
+
+            <div class="ff-form-group mb-3">
+                <label class="ff-form-label" for="serviceBookingBookingDate">วันที่ต้องการใช้สิทธิ์:</label>
+                <input id="serviceBookingBookingDate" name="BookingDate" type="date" class="form-control ff-input-control" required value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="ff-form-group mb-3">
+                <label class="ff-form-label" for="serviceBookingTimeSlot">รอบเวลา:</label>
+                <select id="serviceBookingTimeSlot" name="TimeSlot" class="form-select ff-input-control" required>
+                    <option value="11:00 - 13:00 น.">11:00 - 13:00 น.</option>
+                    <option value="13:30 - 15:30 น." selected>13:30 - 15:30 น.</option>
+                    <option value="16:00 - 18:00 น.">16:00 - 18:00 น.</option>
+                </select>
+            </div>
+
+            <div class="ff-form-group mb-4">
+                <label class="ff-form-label" for="serviceBookingNote">จำนวนผู้ใช้สิทธิ์ / รายละเอียดเพิ่มเติม:</label>
+                <textarea id="serviceBookingNote" name="Note" class="form-control ff-input-control" rows="2" placeholder="เช่น จำนวน 2 ท่าน, ต้องการข้อความ HBD บนหน้าเค้ก ฯลฯ"></textarea>
+            </div>
+
+            <div class="d-flex flex-column gap-2 mt-3">
+                <button class="ff-btn-confirm-pay w-100 py-2 fw-bold" type="submit">
+                     ยืนยันการจองโปรโมชั่น
+                </button>
+                <div class="text-center small text-muted mt-1">
+                     ติดต่อสอบถามเพิ่มเติม LINE: <strong>@@cafephotostudio</strong>
+                </div>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+@section Scripts {
+    <script type="module" src="~/js/service-booking.mjs" asp-append-version="true"></script>
+}

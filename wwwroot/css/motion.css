@@ -1,0 +1,104 @@
+/* Shared feedback for navigation, dialogs, and form submissions. */
+@media (prefers-reduced-motion: no-preference) {
+    .page-enter {
+        animation: page-enter 220ms ease-out;
+    }
+
+    :is(dialog[open], .food-notice, .alert:not(:empty), .food-offers[open] > ul) {
+        animation: reveal-feedback 180ms ease-out;
+    }
+
+    dialog[open]::backdrop {
+        animation: page-enter 180ms ease-out;
+    }
+
+    :is(.btn, .ff-auth-btn-primary, .ff-btn-confirm-pay, .site-nav-button,
+        .food-icon-link, .food-quantity button, .food-category-list button) {
+        transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease,
+            box-shadow 160ms ease, scale 120ms ease;
+    }
+
+    :is(.btn, .ff-auth-btn-primary, .ff-btn-confirm-pay, .site-nav-button,
+        .food-icon-link, .food-quantity button, .food-category-list button,
+        .signup-packages .is-selected):not(:disabled, .disabled, [aria-disabled="true"]):active {
+        scale: .98;
+    }
+
+    @keyframes page-enter {
+        from { opacity: .65; }
+        to { opacity: 1; }
+    }
+
+    @keyframes reveal-feedback {
+        from { opacity: .55; translate: 0 .375rem; }
+        to { opacity: 1; translate: 0 0; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after, dialog::backdrop {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* One underline per navigation group. The current link also works without JavaScript. */
+[data-nav-indicator] {
+    position: relative;
+    --nav-indicator-color: #794927;
+}
+.storefront-hero-layout .site-nav-links {
+    --nav-indicator-color: currentColor;
+}
+.food-icon-nav {
+    --nav-indicator-color: #e2e9d6;
+}
+[data-nav-label] {
+    display: inline-flex;
+    align-items: center;
+}
+[data-nav-indicator].nav-indicator-ready::after {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: var(--nav-indicator-width);
+    height: 2px;
+    border-radius: 2px;
+    background: var(--nav-indicator-color);
+    transform: translate(var(--nav-indicator-x), var(--nav-indicator-y));
+    content: "";
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    [data-nav-indicator].nav-indicator-moving::after {
+        transition: transform 300ms cubic-bezier(.22, .8, .3, 1), width 300ms cubic-bezier(.22, .8, .3, 1);
+    }
+    :is(.site-nav-link, .site-nav-toggle, .admin-menu-toggle, .cafe-button) {
+        transition: color 160ms ease, background-color 160ms ease, scale 120ms ease;
+    }
+    :is(.site-nav-link, .site-nav-toggle, .admin-menu-toggle, .cafe-button):active {
+        scale: .97;
+    }
+    .nav-menu-icon line {
+        transition: transform 220ms ease, opacity 160ms ease;
+    }
+}
+.storefront-hero-layout .site-header .nav-indicator-ready [data-nav-key][aria-current] {
+    text-decoration: none;
+}
+.nav-menu-icon line {
+    transform-origin: center;
+}
+:is(.site-nav-toggle[aria-expanded="true"], body:has(#adminSidebar:is(.showing, .show:not(.hiding))) .admin-menu-toggle)
+    .nav-menu-icon line:first-child {
+    transform: translateY(6px) rotate(45deg);
+}
+:is(.site-nav-toggle[aria-expanded="true"], body:has(#adminSidebar:is(.showing, .show:not(.hiding))) .admin-menu-toggle)
+    .nav-menu-icon line:nth-child(2) {
+    opacity: 0;
+}
+:is(.site-nav-toggle[aria-expanded="true"], body:has(#adminSidebar:is(.showing, .show:not(.hiding))) .admin-menu-toggle)
+    .nav-menu-icon line:last-child {
+    transform: translateY(-6px) rotate(-45deg);
+}

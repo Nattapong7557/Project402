@@ -1,0 +1,14 @@
+@if (TempData["FoodError"] is string error)
+{
+    <p class="food-notice food-notice--error" role="alert">
+        <partial name="_UiIcon" model='"warning"' />
+        <span>@error</span>
+    </p>
+}
+@if (TempData["FoodSuccess"] is string message)
+{
+    <p class="food-notice" role="status">
+        <partial name="_UiIcon" model='"check"' />
+        <span>@message</span>
+    </p>
+}

@@ -1,0 +1,73 @@
+@using Nattapong_7379_L002.Models.FoodOrdering
+@using Nattapong_7379_L002.Services.FoodOrdering
+@using Nattapong_7379_L002.ViewModel.FoodOrdering
+@model FoodOrderListViewModel
+@{
+    Layout = "_FoodOrderingLayout";
+    ViewData["Title"] = Model.Bills ? "เช็คบิล" : "ออเดอร์ของฉัน";
+    var sections = FoodOrderSections.ForCustomer(Model);
+}
+<header class="food-editorial-heading">
+    <div>
+        <h1>@ViewData["Title"]</h1>
+        <p>@(Model.Bills ? "ขอเช็คบิลเมื่ออาหารเสิร์ฟแล้ว และดูยอดสุทธิของแต่ละออเดอร์" : "ดูความคืบหน้าของอาหารแต่ละโต๊ะ และกลับมาดูรายการที่ชำระแล้ว")</p>
+    </div>
+    <a class="btn food-outline-button" asp-controller="FoodOrder" asp-action="@(Model.Bills ? "Orders" : "Index")">
+        <partial name="_UiIcon" model="@(Model.Bills ? "orders" : "food")" /> @(Model.Bills ? "ติดตามออเดอร์" : "ดูเมนูอาหาร")
+    </a>
+</header>
+
+@foreach (var group in sections)
+{
+    <section class="food-order-section" aria-labelledby="@group.Key">
+        <div class="food-section-head d-flex align-items-center gap-3">
+            <span class="food-section-icon"><partial name="_UiIcon" model="group.Icon" /></span>
+            <h2 class="h5 m-0" id="@group.Key">@group.Title</h2>
+            <span class="badge food-count">@group.Orders.Count</span>
+        </div>
+        @if (group.Orders.Count == 0)
+        {
+            <p class="food-empty mb-0">@group.EmptyMessage</p>
+        }
+        else
+        {
+            <div class="food-ticket-grid">
+                @foreach (var order in group.Orders)
+                {
+                    var canCheckBill = Model.Bills && order.Status == FoodOrderStatus.Served;
+                    var birthdayPending = canCheckBill && order.Subtotal >= FoodPricing.BirthdayMinimum && order.DiscountCode != FoodPricing.Birthday;
+                    <article class="card food-ticket">
+                        <partial name="_OrderSummary" model="@(new FoodTicketViewModel(order, BirthdayPending: birthdayPending))" />
+                        @if (canCheckBill)
+                        {
+                            <form asp-controller="FoodOrder" asp-action="RequestBill" method="post" class="mt-3">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                @if (birthdayPending)
+                                {
+                                    <div class="food-birthday-offer mb-3">
+                                        <p class="mb-1"><strong>สิทธิ์เดือนเกิด ลด 15%</strong></p>
+                                        <p class="small mb-2">ยอดครบ ฿1,500 ใช้ได้ปีละครั้ง ระบบเลือกส่วนลดที่คุ้มที่สุดให้อัตโนมัติ</p>
+                                        @if (Model.NeedsBirthDate)
+                                        {
+                                            <label for="bill-birthday-@order.Id" class="form-label">วันเกิด <small>(ไม่บังคับ)</small></label>
+                                            <input type="date" name="birthDate" id="bill-birthday-@order.Id" class="form-control" />
+                                        }
+                                        else
+                                        {
+                                            <p class="small mb-0">ระบบจะตรวจสิทธิ์จากวันเกิดที่บันทึกไว้</p>
+                                        }
+                                    </div>
+                                }
+                                <button class="btn food-button" type="submit">ขอเช็คบิล</button>
+                            </form>
+                        }
+                        else if (!Model.Bills && order.Status == FoodOrderStatus.Served)
+                        {
+                            <a class="btn food-button mt-3" asp-controller="FoodOrder" asp-action="Bills">ไปหน้าเช็คบิล</a>
+                        }
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}

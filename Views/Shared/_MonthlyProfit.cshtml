@@ -1,0 +1,38 @@
+@using System.Globalization
+@model Nattapong_7379_L002.ViewModel.MonthlyProfitViewModel
+@{
+    var thai = CultureInfo.GetCultureInfo("th-TH");
+}
+<section class="work-panel mb-4" aria-labelledby="monthly-profit-title">
+    <h2 class="h5" id="monthly-profit-title">สรุปกำไรสุทธิ · @Model.Month.ToString("MMMM yyyy", thai)</h2>
+    <dl class="row g-3 mt-1 mb-3">
+        <div class="col-6 col-lg-3">
+            <dt>บิลอาหาร (จำลอง)</dt>
+            <dd class="mb-0">@Model.FoodRevenue.ToString("N2", thai) บาท</dd>
+        </div>
+        <div class="col-6 col-lg-3">
+            <dt>ค่าสมาชิก (จำลอง)</dt>
+            <dd class="mb-0">@Model.MembershipRevenue.ToString("N2", thai) บาท</dd>
+        </div>
+        <div class="col-6 col-lg-3">
+            <dt>รายรับที่บันทึกเอง</dt>
+            <dd class="mb-0">@Model.ManualIncome.ToString("N2", thai) บาท</dd>
+        </div>
+        <div class="col-6 col-lg-3">
+            <dt>รายจ่ายที่บันทึกเอง</dt>
+            <dd class="mb-0">@Model.Expenses.ToString("N2", thai) บาท</dd>
+        </div>
+        <div class="col-6 col-lg-3">
+            <dt>รายรับรวม</dt>
+            <dd class="mb-0">@Model.TotalIncome.ToString("N2", thai) บาท</dd>
+        </div>
+        <div class="col-6 col-lg-3">
+            <dt>@(Model.NetProfit < 0 ? "ขาดทุนสุทธิ" : "กำไรสุทธิ")</dt>
+            <dd class="mb-0 fw-bold">@Math.Abs(Model.NetProfit).ToString("N2", thai) บาท</dd>
+        </div>
+    </dl>
+    @if (Model.UnreadableRecords > 0)
+    {
+        <p class="alert alert-warning mb-0">ยอดสรุปยังไม่ครบ มีรายการบัญชีที่อ่านจำนวนเงินไม่ได้ @Model.UnreadableRecords รายการ</p>
+    }
+</section>

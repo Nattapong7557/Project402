@@ -1,0 +1,127 @@
+@using Nattapong_7379_L002.Services.FoodOrdering
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var isAdmin = string.Equals(Context.Session.GetString("AccountRole"), "Admin", StringComparison.OrdinalIgnoreCase);
+    var isHome = controller == "Home" && action == "Index";
+    var isAdminWorkspace = isAdmin && controller != "Home" && controller != "Booking";
+    var isRoleWorkspace = isAdminWorkspace || StaffWorkspace.IsWorkspaceController(controller) ||
+        StaffWorkspace.ForRole(Context.Session.GetString("AccountRole")) is not null;
+    var hasStorefrontHero = isHome || IsSectionDefined("StorefrontHero");
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Café &amp; photo Studio</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cafe.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    @if (controller == "FoodStaff")
+    {
+        <link rel="stylesheet" href="~/css/food-ordering.css" asp-append-version="true" />
+    }
+    @if (isRoleWorkspace)
+    {
+        <link rel="stylesheet" href="~/css/staff-workspace.css" asp-append-version="true" />
+    }
+    @if (controller == "Booking")
+    {
+        <link rel="stylesheet" href="~/css/booking.css" asp-append-version="true" />
+    }
+    <link rel="stylesheet" href="~/css/motion.css" asp-append-version="true" />
+</head>
+<body class="ff-body-wrapper @(isAdmin ? "admin-layout-active" : "") @(isHome ? "cafe-home-layout" : "") @(hasStorefrontHero ? "storefront-hero-layout" : "") @(isAdminWorkspace ? "admin-workspace-layout" : "") @(isRoleWorkspace ? "workspace-layout" : "")">
+    @if (isAdmin)
+    {
+        <partial name="_AdminSidebar" />
+    }
+
+    <partial name="_SiteHeader" />
+
+    <main class="ff-main-content page-enter" id="main-content">
+        @await RenderSectionAsync("StorefrontHero", required: false)
+        <div class="@(isHome ? "cafe-home-body" : "cafe-page-container")">
+            @if (!isHome && TempData["WelcomeMessage"] is string welcome)
+            {
+                <div class="alert alert-success ff-auth-alert shadow-sm mb-3" role="alert">
+                    <div>@welcome</div>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] is string errorMsg)
+            {
+                <div class="alert alert-danger ff-auth-alert shadow-sm mb-3" role="alert">
+                    <div>@errorMsg</div>
+                </div>
+            }
+            @if (TempData["AccessDenied"] is string accessDeniedMessage)
+            {
+                <div class="alert alert-warning ff-alert" role="alert">@accessDeniedMessage</div>
+            }
+            @if (TempData["AdminSuccess"] is string adminSuccess)
+            {
+                <div class="alert alert-success ff-auth-alert shadow-sm mb-3" role="alert">
+                    <div>@adminSuccess</div>
+                </div>
+            }
+            @if (TempData["AdminError"] is string adminError)
+            {
+                <div class="alert alert-danger ff-auth-alert shadow-sm mb-3" role="alert">
+                    <div>@adminError</div>
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </main>
+
+    @if (!isRoleWorkspace)
+    {
+    <footer class="ff-footer-compact">
+        <div class="cafe-footer-container">
+            <div class="ff-footer-row">
+                <div class="ff-footer-col ff-col-brand">
+                    
+                    <div class="ff-footer-desc-box">
+                        <h6 class="ff-footer-title">Café &amp; photo Studio</h6>
+                        <p class="m-0">คาเฟ่ &amp; สตูดิโอถ่ายภาพ สัมผัสความละมุนของกาแฟและบันทึกโมเมนต์สุดพิเศษ</p>
+                    </div>
+                </div>
+
+                <div class="ff-footer-col ff-col-contact">
+                    <div class="ff-footer-tag">ติดต่อร้าน</div>
+                    <div class="ff-footer-desc-box">
+                        <p class="mb-1"><strong>เปิดทำการ</strong> ทุกวัน 08:30 &ndash; 18:30 น.</p>
+                        <p class="m-0"><strong>Line:</strong><a href="https://line.me/ti/p/~@@cafephotostudio" target="_blank" rel="noopener noreferrer" class="text-dark fw-bold text-decoration-none">@@cafephotostudio</a>&bull; <strong>โทร:</strong><a href="tel:0827379000" class="text-dark text-decoration-none">082-xxx-7379</a></p>
+                    </div>
+                </div>
+
+                <div class="ff-footer-col ff-col-art">
+                    <div class="ff-footer-menu-card" title="Signature Matcha Latte Menu">
+                        <img src="https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=320&q=80" alt="Special Matcha Menu" class="ff-footer-menu-img" loading="lazy" />
+                        <div class="ff-footer-menu-badge">
+                            <span>Special Menu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ff-footer-bottom-line">
+                <span>&copy; 2569 Café &amp; photo Studio. All Rights Reserved.</span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">นโยบายความเป็นส่วนตัว</a>
+            </div>
+        </div>
+    </footer>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="~/js/navbar-indicator.mjs" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

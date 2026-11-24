@@ -1,0 +1,164 @@
+@using Nattapong_7379_L002.Services
+@model IEnumerable<Nattapong_7379_L002.Models.Booking>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "ประวัติการจองของฉัน - My Bookings";
+    var userPackage = Context.Session.GetString("AccountPackage") ?? "Premium";
+    var displayName = Context.Session.GetString("AccountDisplayName") ?? Context.Session.GetString("AccountName") ?? "สมาชิก VIP";
+}
+
+@section StorefrontHero {
+    <partial name="_StorefrontHero" model='("การจองของฉัน", "ดูรายการจองและติดตามสถานะของคุณ", "~/images/header-bookings.webp")' />
+}
+
+<div class="ff-my-bookings-page py-3" data-booking-status-url="@Url.Action("StatusUpdates", "Booking")">
+    <!-- VIP Member Status Card Header -->
+    <div class="ff-vip-member-banner mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="ff-vip-avatar">
+                        <span>VIP</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning text-dark border border-warning-subtle mb-1">@userPackage MEMBER</span>
+                        <h3 class="fw-bold m-0 text-white">@displayName</h3>
+                        <p class="text-white-50 small mb-0">สถานะจะอัปเดตอัตโนมัติขณะเปิดหน้านี้</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a class="ff-pill-btn ff-pill-menu" asp-controller="Booking" asp-action="Table">
+                    + จองบริการใหม่
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (TempData["BookingSuccess"] is string successMsg)
+    {
+        <div class="alert alert-success ff-auth-alert mb-4" role="status">
+            <strong>สำเร็จ:</strong> @successMsg
+        </div>
+    }
+    @if (TempData["BookingError"] is string errorMsg)
+    {
+        <div class="alert alert-warning ff-auth-alert mb-4" role="status">@errorMsg</div>
+    }
+    <p class="text-muted small" data-booking-refresh-message role="status" hidden></p>
+
+    <!-- Bookings Section -->
+    <div class="ff-catalog-header mb-3">
+        <h4 class="fw-bold text-dark m-0">รายการจองของฉัน (@(Model?.Count() ?? 0) รายการ)</h4>
+        <p class="text-muted small">ลำดับสถานะ: 1. รอ Staff Queue อนุมัติ &rarr; 2. อนุมัติรับคิวแล้ว &rarr; 3. กำลังเตรียมอาหาร/บริการ &rarr; 4. เสิร์ฟแล้ว &rarr; 5. ชำระเงินเสร็จสิ้น</p>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="ff-empty-bookings-card text-center p-5 mb-4">
+            <h5 class="fw-bold text-dark">ยังไม่มีรายการจองในระบบ</h5>
+            <p class="text-muted small mb-3">คุณสามารถเลือกจองโต๊ะคาเฟ่ คิวช่างภาพ ช่างแต่งหน้า หรือเช่าชุดถ่ายรูปได้เลย</p>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a class="ff-pill-btn ff-pill-action" asp-controller="Booking" asp-action="Table">จองโต๊ะที่นั่ง</a>
+                <a class="ff-pill-btn ff-pill-menu" asp-controller="Booking" asp-action="Photographer">จองช่างภาพ</a>
+                <a class="ff-pill-btn ff-pill-menu" asp-controller="Booking" asp-action="Makeup">จองช่างแต่งหน้า</a>
+                <a class="ff-pill-btn ff-pill-menu" asp-controller="Booking" asp-action="Costumes">เช่าชุดสตูดิโอ</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var item in Model)
+            {
+                var status = CustomerBookingStatus.Describe(item.Status);
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="ff-booking-record-card cafe-booking-record h-100" data-booking-id="@item.Id">
+                        <div>
+                            <div class="cafe-booking-record-badges">
+                                <span class="ff-service-badge @item.ServiceType.ToLower()">
+                                    @switch (item.ServiceType.ToLower())
+                                    {
+                                        case "table":
+                                            <span>คิวโต๊ะที่นั่ง (#@item.Id)</span>
+                                            break;
+                                        case "makeup":
+                                            <span>ช่างแต่งหน้า (#@item.Id)</span>
+                                            break;
+                                        case "photographer":
+                                            <span>ช่างภาพ (#@item.Id)</span>
+                                            break;
+                                        case "costume":
+                                            <span>เช่าชุด (#@item.Id)</span>
+                                            break;
+                                        default:
+                                            <span>โปรโมชั่น (#@item.Id)</span>
+                                            break;
+                                    }
+                                </span>
+                                <span class="@status.BadgeClass" data-booking-status aria-live="polite">@status.Label</span>
+                            </div>
+
+                            <h3 class="cafe-booking-record-title">@item.ItemName</h3>
+
+                            <div class="cafe-booking-progress" data-booking-progress hidden="@(status.Progress == 0)">
+                                <progress value="@status.Progress" max="100" aria-label="ความคืบหน้าการจอง"></progress>
+                                <div class="cafe-booking-progress-labels">
+                                    <span data-progress-step="20" class="@(status.Progress >= 20 ? "fw-bold text-dark" : "")">รอคิว</span>
+                                    <span data-progress-step="45" class="@(status.Progress >= 45 ? "fw-bold text-dark" : "")">รับคิว</span>
+                                    <span data-progress-step="65" class="@(status.Progress >= 65 ? "fw-bold text-dark" : "")">เตรียม</span>
+                                    <span data-progress-step="85" class="@(status.Progress >= 85 ? "fw-bold text-dark" : "")">เสิร์ฟ</span>
+                                    <span data-progress-step="100" class="@(status.Progress >= 100 ? "fw-bold text-success" : "")">ชำระ</span>
+                                </div>
+                            </div>
+
+                            <dl class="cafe-booking-facts">
+                                @if (item.Charge is { } charge)
+                                {
+                                    <div><dt>ส่วนลดฟูลแพ็กเกจ</dt><dd>฿@charge.Discount.ToString("N2")</dd></div>
+                                    <div><dt>ยอดจองสุทธิ</dt><dd>฿@charge.Total.ToString("N2")</dd></div>
+                                }
+                                <div>
+                                    <dt>วันที่</dt>
+                                    <dd>@item.BookingDate</dd>
+                                </div>
+                                <div>
+                                    <dt>รอบเวลา</dt>
+                                    <dd>@item.TimeSlot</dd>
+                                </div>
+                                <div>
+                                    <dt>จำนวนผู้เข้าร่วม</dt>
+                                    <dd>@item.GuestCount ท่าน</dd>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(item.Note))
+                                {
+                                    <div class="cafe-booking-note">
+                                        <dt>หมายเหตุ</dt>
+                                        <dd>@item.Note</dd>
+                                    </div>
+                                }
+                            </dl>
+                        </div>
+
+                        <div class="cafe-booking-record-footer">
+                            <span class="small text-muted">สอบถามเพิ่มเติม LINE: <strong>@@cafephotostudio</strong></span>
+                            <form asp-controller="Booking" asp-action="Cancel" method="post" class="m-0" data-booking-cancel hidden="@(!status.CanCancel)">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('คุณต้องการยกเลิกการจองรายการนี้ใช่หรือไม่?');">
+                                    ยกเลิกการจอง
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/booking-status.mjs" asp-append-version="true"></script>
+}

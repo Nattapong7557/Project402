@@ -1,0 +1,99 @@
+@model Nattapong_7379_L002.ViewModel.LoginViewModel
+
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "เข้าสู่ระบบ";
+}
+
+<!-- Floating Back to Home Pill -->
+<a class="ff-auth-back-pill" asp-controller="Home" asp-action="Index" title="กลับหน้าหลัก">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    <span>กลับหน้าหลัก</span>
+</a>
+
+<div class="ff-auth-outer">
+    <section class="ff-auth-card">
+        <!-- 1. Left Visual Side: ภาพบรรยากาศคาเฟ่ & สตูดิโอ พร้อมคำโปรยหรูหรา -->
+        <div class="ff-auth-visual">
+            <img class="ff-auth-image" src="~/images/cafe-auth.jpg" asp-append-version="true" alt="Café & photo Studio" />
+            <div class="ff-auth-visual-overlay"></div>
+            <div class="ff-auth-copy">
+                <span class="ff-auth-tag">CAFÉ &amp; PHOTO STUDIO</span>
+                <h2>ยินดีต้อนรับกลับมา</h2>
+                <p>กลับมาพักใจ เติมพลังด้วยกาแฟแก้วโปรด และบันทึกช่วงเวลาแสนพิเศษไปกับเรา</p>
+                
+                <div class="ff-auth-perks">
+                    <div class="ff-perk-item">
+                        <span class="ff-perk-icon"></span>
+                        <span>กาแฟคัดพิเศษ &amp; เบเกอรี่อบสดใหม่</span>
+                    </div>
+                    <div class="ff-perk-item">
+                        <span class="ff-perk-icon"></span>
+                        <span>สิทธิ์จองสตูดิโอถ่ายภาพพร้อมแสงธรรมชาติ</span>
+                    </div>
+                    <div class="ff-perk-item">
+                        <span class="ff-perk-icon"></span>
+                        <span>สิทธิพิเศษและส่วนลดเฉพาะสมาชิก VIP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Right Form Side: ฟอร์มเข้าสู่ระบบ ดีไซน์มินิมอลโมเดิร์น -->
+        <div class="ff-auth-panel">
+            <div class="ff-auth-header text-center text-md-start">
+                <span class="ff-auth-brand-badge">Café &amp; photo Studio</span>
+                <h1 class="ff-auth-title">เข้าสู่ระบบ</h1>
+                <p class="text-muted small">กรอกอีเมลและรหัสผ่านของคุณ เพื่อเริ่มต้นใช้งาน</p>
+            </div>
+
+            <form class="ff-auth-form" asp-controller="Account" asp-action="Login" method="post">
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger ff-auth-alert" role="alert"></div>
+
+                <div class="ff-form-group">
+                    <label class="ff-form-label" for="email">อีเมล หรือ ชื่อผู้ใช้ (Email / Username)</label>
+                    <div class="ff-input-wrap">
+                        <svg class="ff-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <input asp-for="Email" id="email" type="text" class="ff-input-control" placeholder="example@gmail.com หรือ staffqueue" autocomplete="username" required />
+                    </div>
+                    <span asp-validation-for="Email" class="ff-field-error"></span>
+                </div>
+
+                <div class="ff-form-group">
+                    <label class="ff-form-label" for="password">รหัสผ่าน (Password)</label>
+                    <div class="ff-input-wrap">
+                        <svg class="ff-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input asp-for="Password" id="password" type="password" class="ff-input-control" placeholder="••••••••" autocomplete="current-password" required />
+                    </div>
+                    <span asp-validation-for="Password" class="ff-field-error"></span>
+                </div>
+
+                <button class="ff-auth-btn-primary" type="submit">
+                    <span>เข้าสู่ระบบ</span>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+
+                <div class="ff-auth-divider">
+                    <span>ยังไม่มีบัญชีสมาชิก?</span>
+                </div>
+
+                <a class="ff-auth-btn-secondary" asp-controller="Account" asp-action="Register">
+                    สมัครสมาชิกใหม่ (Create Account)
+                </a>
+            </form>
+        </div>
+    </section>
+</div>

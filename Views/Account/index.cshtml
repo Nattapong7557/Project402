@@ -1,0 +1,34 @@
+@{
+    var accountName = ViewBag.AccountName as string;
+    Layout = string.IsNullOrWhiteSpace(accountName) ? "_Layout" : "_BlankLayout";
+    ViewData["Title"] = "บัญชีของฉัน";
+}
+
+<section class="ff-account-page">
+    @if (string.IsNullOrWhiteSpace(accountName))
+    {
+        <div class="ff-account-intro">
+            <span class="ff-eyebrow">CAFÉ &amp; PHOTO STUDIO</span>
+            <h1>สร้างพื้นที่ของคุณ</h1>
+            <p>บันทึกการจองและแพ็กเกจถ่ายภาพไว้ในบัญชีเดียว</p>
+        </div>
+
+        <form class="ff-account-form" asp-controller="Account" asp-action="Create" method="post">
+            <label for="displayName">ชื่อที่อยากให้เราเรียก</label>
+            <input id="displayName" name="displayName" type="text" placeholder="เช่น Nattapong" autocomplete="name" required />
+            <button class="ff-form-button" type="submit">เริ่มต้นใช้งาน <span aria-hidden="true">↗</span></button>
+        </form>
+    }
+    else
+    {
+        <div class="ff-account-intro">
+            <span class="ff-eyebrow">WELCOME BACK</span>
+            <h1>สวัสดี, @accountName</h1>
+            <p>บัญชีของคุณพร้อมสำหรับการจองช่วงเวลาพิเศษแล้ว</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post">
+            <button class="ff-signout-button" type="submit">ออกจากบัญชี</button>
+        </form>
+    }
+</section>

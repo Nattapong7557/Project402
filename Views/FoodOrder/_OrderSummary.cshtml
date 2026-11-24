@@ -1,0 +1,40 @@
+@using Nattapong_7379_L002.Services.FoodOrdering
+@using Nattapong_7379_L002.ViewModel.FoodOrdering
+@model FoodTicketViewModel
+@{
+    var order = Model.Order;
+}
+<header class="food-ticket-header">
+    <div><p class="food-ticket-id">ออเดอร์ #@order.Id</p><h3>โต๊ะ @order.TableNumber</h3></div>
+    <span class="badge food-status" data-status="@order.Status">@FoodOrderRules.StatusLabel(order.Status)</span>
+</header>
+<ul class="food-ticket-lines">
+    @foreach (var line in order.Items.OrderBy(line => line.Id))
+    {
+        <li>
+            <span>@line.ItemName <span class="badge food-count">× @line.Quantity</span></span>
+            @if (Model.ShowTotals)
+            {
+                <span>฿@((line.UnitPrice * line.Quantity).ToString("N2"))</span>
+            }
+        </li>
+    }
+</ul>
+@if (Model.ShowTotals)
+{
+    <dl class="food-ticket-totals mb-0">
+        <div><dt>ยอดก่อนส่วนลด</dt><dd>฿@order.Subtotal.ToString("N2")</dd></div>
+        @if (order.Discount > 0)
+        {
+            <div><dt>@FoodPricing.DiscountLabel(order.DiscountCode)</dt><dd>−฿@order.Discount.ToString("N2")</dd></div>
+        }
+        <div class="food-ticket-net"><dt>@(Model.BirthdayPending ? "ยอดก่อนตรวจสิทธิ์วันเกิด" : "ยอดสุทธิ")</dt><dd>฿@order.Total.ToString("N2")</dd></div>
+    </dl>
+}
+@if (order.Payment is not null)
+{
+    <p class="food-payment-time">
+        <partial name="_UiIcon" model="@("check")" />
+        ชำระแล้ว ฿@order.Payment.Amount.ToString("N2") · @FoodPricing.BangkokTime(order.Payment.PaidAt).ToString("dd/MM/yyyy HH:mm") น.
+    </p>
+}

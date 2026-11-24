@@ -1,0 +1,475 @@
+/* Shared palette and component sizing for the storefront and account layouts. */
+:root {
+    --cafe-ink: #37241b;
+    --cafe-muted: #6d594c;
+    --cafe-accent: #754426;
+    --cafe-accent-hover: #54301c;
+    --cafe-paper: #fbf8f3;
+    --cafe-surface: #fffdf9;
+    --cafe-line: #e6d9ca;
+    --cafe-control-line: #bca591;
+    --cafe-selection: #f0dfcf;
+    --cafe-danger: #9b352b;
+    --cafe-display: 'Chonburi', 'Mitr', Georgia, serif;
+    --cafe-radius: .875rem;
+    --cafe-control-radius: .625rem;
+    --cafe-control-height: 3.125rem;
+    --cafe-panel-padding: clamp(1.125rem, 3vw, 2.75rem);
+    --cafe-page-gutter: clamp(1rem, 3vw, 2.75rem);
+    --cafe-page-width: 98rem;
+}
+
+:is(.ff-body-wrapper, .ff-auth-shell) {
+    --ff-theme-cream-bg: var(--cafe-paper);
+    --ff-theme-cream-surface: var(--cafe-surface);
+    --ff-theme-cream-card: var(--cafe-surface);
+    --ff-theme-cream-alt: #f6efe6;
+    --ff-theme-border-soft: var(--cafe-line);
+    --ff-theme-border-medium: var(--cafe-control-line);
+    --ff-theme-brown-deep: var(--cafe-ink);
+    --ff-theme-brown-main: var(--cafe-ink);
+    --ff-theme-brown-muted: var(--cafe-muted);
+    --ff-theme-shadow-sm: 0 2px 8px rgb(55 36 27 / .035);
+    --ff-theme-shadow-md: 0 6px 20px rgb(55 36 27 / .06);
+}
+
+.cafe-page-container,
+.cafe-footer-container {
+    width: 100%;
+    max-width: var(--cafe-page-width);
+    margin-inline: auto;
+    padding-inline: var(--cafe-page-gutter);
+}
+
+.cafe-page-container {
+    padding-block: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.ff-body-wrapper .ff-footer-compact {
+    background: var(--cafe-surface);
+    border-color: var(--cafe-line);
+}
+
+.ff-footer-compact .ff-footer-desc-box {
+    border-color: var(--cafe-line);
+    box-shadow: none;
+}
+
+.ff-footer-compact .ff-footer-tag {
+    background: var(--cafe-selection);
+    color: var(--cafe-accent-hover);
+}
+
+.ff-privacy-wrapper :is(.ff-hero-card, .ff-footer-desc-box),
+.cafe-page-container .ff-account-page {
+    border: 1px solid var(--cafe-line);
+    border-radius: var(--cafe-radius);
+    background: var(--cafe-surface);
+    box-shadow: none;
+}
+
+.ff-privacy-wrapper .ff-hero-card {
+    max-width: 58rem;
+    padding: var(--cafe-panel-padding);
+}
+
+.ff-privacy-wrapper .ff-footer-tag {
+    background: var(--cafe-selection);
+    color: var(--cafe-accent-hover);
+}
+
+.cafe-page-container .ff-vip-member-banner {
+    border-color: #6d5140 !important;
+    background: #483123 !important;
+    box-shadow: none !important;
+}
+
+.cafe-page-container .ff-vip-avatar {
+    background: var(--cafe-selection);
+    color: var(--cafe-accent-hover);
+}
+
+/* Panels retain their page-specific layout and share a surface and type scale. */
+.cafe-page-container :is(.ff-admin-page, .ff-role-workspace) {
+    width: 100%;
+    margin-block: 0;
+    background: var(--cafe-surface) !important;
+    border: 1px solid var(--cafe-line) !important;
+    border-radius: var(--cafe-radius) !important;
+    box-shadow: none !important;
+    padding: var(--cafe-panel-padding) !important;
+}
+
+.ff-role-workspace::before {
+    content: none;
+}
+
+.cafe-page-container :is(.ff-workspace-form-card, .ff-card-workspace, .ff-dashboard-panel, .ff-kpi-card, .ff-ledger-strip, .ff-queue-strip:not(.ff-queue-strip-pending), .ff-seating-plan-card, .ff-booking-form-card, .ff-booking-record-card, .ff-empty-bookings-card, .ff-service-card, .ff-promo-card),
+.ff-auth-shell :is(.ff-package-card:not(.is-selected), .ff-payment-summary-card),
+:is(.ff-user-editor, .ff-delete-confirm, .ff-service-modal-card, #learnMoreModal .modal-content) {
+    border: 1px solid var(--cafe-line) !important;
+    border-radius: var(--cafe-radius) !important;
+    background: var(--cafe-surface) !important;
+    color: var(--cafe-ink);
+    box-shadow: var(--ff-theme-shadow-sm) !important;
+}
+
+.cafe-page-container .ff-service-card:hover {
+    transform: none !important;
+    border-color: var(--cafe-line) !important;
+    box-shadow: var(--ff-theme-shadow-md) !important;
+}
+
+.cafe-page-container :is(.ff-booking-record-card, .ff-empty-bookings-card) {
+    background: #fcf6ee !important;
+}
+
+.cafe-page-container :is(.ff-role-header-title, .ff-admin-heading h1, .ff-catalog-title),
+.ff-auth-shell .ff-auth-title {
+    color: var(--cafe-ink);
+    font-family: var(--cafe-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    line-height: 1.3;
+}
+
+.cafe-page-container :is(.ff-role-header-desc, .ff-admin-heading p, .ff-service-desc),
+.ff-auth-shell .ff-form-label {
+    color: var(--cafe-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.cafe-page-container :is(.ff-role-header-badge, .ff-role-badge, .ff-pill-filter-active),
+.ff-auth-shell .ff-auth-brand-badge {
+    border-color: var(--cafe-line);
+    background: var(--cafe-selection);
+    color: var(--cafe-accent-hover);
+}
+
+/* Bootstrap controls, older account fields, and editor dialogs use one control style. */
+:is(.cafe-page-container, .ff-auth-shell, .ff-service-modal-card) :is(.form-control, .form-select, .ff-input-control, .ff-editor-input, .ff-account-form input:not([type="hidden"])) {
+    min-height: var(--cafe-control-height);
+    border: 1px solid var(--cafe-control-line);
+    border-radius: var(--cafe-control-radius);
+    background-color: var(--cafe-surface);
+    color: var(--cafe-ink);
+    font-size: 1rem;
+}
+
+:is(.cafe-page-container, .ff-auth-shell, .ff-service-modal-card) :is(.form-control, .form-select, .ff-input-control, .ff-editor-input):focus {
+    border-color: var(--cafe-accent);
+    box-shadow: 0 0 0 .2rem rgb(117 68 38 / .18);
+}
+
+:is(.cafe-page-container, .ff-auth-shell, .ff-service-modal-card) .input-validation-error {
+    border-color: var(--cafe-danger);
+}
+
+:is(.cafe-page-container, .ff-auth-shell) :is(.field-validation-error, .validation-summary-errors) {
+    color: var(--cafe-danger);
+}
+
+:is(.cafe-page-container, .ff-auth-shell, .ff-service-modal-card) :focus-visible {
+    outline: 2px solid var(--cafe-accent);
+    outline-offset: 3px;
+}
+
+:is(.ff-body-wrapper, .ff-auth-shell) :is(.ff-admin-button:not(.ff-delete-button), .ff-btn-admin-add, .ff-btn-book-service, .ff-btn-submit-olive, .ff-auth-btn-primary, .ff-btn-confirm-pay, .ff-form-button, .ff-pill-action) {
+    border-color: var(--cafe-accent) !important;
+    border-radius: var(--cafe-control-radius) !important;
+    background: var(--cafe-accent) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    text-decoration: none;
+}
+
+:is(.ff-body-wrapper, .ff-auth-shell) :is(.ff-admin-button:not(.ff-delete-button), .ff-btn-admin-add, .ff-btn-book-service, .ff-btn-submit-olive, .ff-auth-btn-primary, .ff-btn-confirm-pay, .ff-form-button, .ff-pill-action):hover {
+    border-color: var(--cafe-accent-hover) !important;
+    background: var(--cafe-accent-hover) !important;
+    transform: none;
+}
+
+:is(.cafe-page-container, .ff-auth-shell) :is(.ff-secondary-button, .ff-auth-btn-secondary, .ff-edit-button, .btn-outline-secondary) {
+    border-color: var(--cafe-control-line);
+    background: var(--cafe-surface);
+    color: var(--cafe-accent-hover);
+}
+
+:is(.cafe-page-container, .ff-auth-shell) :is(.ff-secondary-button, .ff-auth-btn-secondary, .ff-edit-button, .btn-outline-secondary):hover {
+    border-color: var(--cafe-accent);
+    background: var(--cafe-selection);
+    color: var(--cafe-accent-hover);
+}
+
+.cafe-table-frame {
+    overflow: auto;
+    border: 1px solid var(--cafe-line);
+    border-radius: var(--cafe-radius);
+    background: var(--cafe-surface);
+}
+
+.cafe-table-frame table {
+    min-width: 40rem;
+}
+
+.cafe-table-frame :is(th, td) {
+    padding: .875rem 1rem;
+}
+
+.cafe-table-frame thead th {
+    background: var(--cafe-paper);
+    color: var(--cafe-ink);
+    font-size: .9375rem;
+}
+
+.ff-auth-shell .ff-auth-card {
+    width: min(100%, 76rem);
+    border-color: var(--cafe-line);
+    background: var(--cafe-surface);
+    box-shadow: var(--ff-theme-shadow-md);
+}
+
+.ff-auth-shell .ff-auth-card-wide {
+    width: min(100%, 84rem);
+}
+
+.ff-auth-shell .ff-auth-panel {
+    padding: var(--cafe-panel-padding);
+}
+
+.ff-auth-shell .ff-auth-visual {
+    background: var(--cafe-ink);
+}
+
+.ff-auth-shell .ff-auth-visual-overlay {
+    background: linear-gradient(180deg, rgb(55 36 27 / .12), rgb(55 36 27 / .9));
+}
+
+.ff-auth-shell :is(.ff-step-item.active, .ff-step-item.done) .ff-step-num {
+    border-color: var(--cafe-accent);
+    background: var(--cafe-accent);
+    color: white;
+}
+
+.ff-auth-shell .ff-step-line.active {
+    background: var(--cafe-accent);
+}
+
+.ff-auth-shell .ff-package-card.is-selected {
+    border-color: var(--cafe-accent);
+    background: #f8ebdf;
+}
+
+.ff-plan-image-wrap {
+    padding: .75rem;
+    border: 1px solid var(--cafe-line);
+    border-radius: var(--cafe-radius);
+    background: #f6efe6;
+}
+
+button.ff-legend-item {
+    min-height: 2.75rem;
+    color: var(--cafe-ink);
+    text-align: start;
+}
+
+.cafe-account-editor {
+    max-width: 70rem;
+}
+
+.cafe-admin-form {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.cafe-form-section {
+    min-width: 0;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--cafe-line);
+    border-radius: var(--cafe-radius);
+    background: var(--cafe-paper);
+}
+
+.cafe-form-section legend {
+    float: none;
+    width: auto;
+    margin: 0;
+    padding: 0 .5rem;
+    color: var(--cafe-ink);
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+.cafe-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+}
+
+.cafe-field {
+    display: grid;
+    align-content: start;
+    min-width: 0;
+    gap: .375rem;
+}
+
+.cafe-field label {
+    font-weight: 500;
+}
+
+.cafe-field small {
+    color: var(--cafe-muted);
+}
+
+.cafe-field .field-validation-valid,
+.cafe-admin-form .validation-summary-valid {
+    display: none;
+}
+
+.cafe-admin-form .validation-summary-errors {
+    padding: .75rem 1rem;
+    border: 1px solid #e8beb6;
+    border-radius: var(--cafe-control-radius);
+    background: #fdf2f0;
+}
+
+.cafe-role-field {
+    max-width: 28rem;
+}
+
+.cafe-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.cafe-form-actions .cafe-button {
+    min-height: var(--cafe-control-height);
+    font-size: 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .cafe-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .cafe-form-section {
+        padding: 1rem;
+    }
+
+    .cafe-form-actions > * {
+        flex: 1 0 100%;
+    }
+}
+
+
+.admin-service-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--cafe-line);
+}
+.admin-service-heading h1 {
+    margin: 0 0 .375rem;
+    color: #382b22;
+    font: 500 clamp(1.5rem, 3vw, 2.25rem)/1.35 'Mitr', system-ui, sans-serif;
+}
+.admin-service-heading p {
+    margin: 0;
+    color: #61594d;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+.admin-service-action {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.75rem;
+}
+.admin-service-action .ui-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+}
+.admin-service-empty {
+    padding: 1.5rem;
+    border: 1px dashed var(--cafe-line);
+    border-radius: var(--cafe-radius);
+}
+.admin-service-page .ff-admin-table {
+    min-width: 54rem;
+}
+.admin-service-page .ff-admin-table th:nth-child(3),
+.admin-service-page .ff-admin-table th:nth-child(4) {
+    min-width: 9rem;
+}
+.admin-service-page .cafe-form-section {
+    max-width: 52rem;
+}
+.admin-service-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cafe-line);
+}
+
+@media (max-width: 49rem) {
+    .admin-service-heading { flex-direction: column; align-items: flex-start; }
+}
+
+.signup-packages {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16.25rem), 1fr));
+}
+.ff-auth-shell .signup-packages .is-selected {
+    border-color: #526d4d;
+    background: #f1f5ec;
+    box-shadow: inset 0 0 0 1px #526d4d, 0 .25rem 1rem rgb(50 68 46 / .08);
+}
+.ff-auth-shell .signup-packages .is-selected:hover {
+    border-color: #3c563b;
+    transform: none;
+}
+.signup-packages .is-selected:focus-within {
+    outline: 2px solid #526d4d;
+    outline-offset: 4px;
+}
+.signup-packages .signup-package-unavailable {
+    color: #61594d;
+    cursor: not-allowed;
+}
+.signup-packages .signup-package-unavailable:hover {
+    border-color: var(--cafe-line);
+    box-shadow: none;
+    transform: none;
+}
+.signup-package-status {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: .375rem;
+    margin-bottom: .875rem;
+    padding: .375rem .625rem;
+    border-radius: .5rem;
+    background: #eee9e0;
+    color: #61594d;
+    font-size: .875rem;
+    font-weight: 500;
+}
+.is-selected .signup-package-status {
+    background: #dce9d6;
+    color: #30492f;
+}
+.signup-package-status .ui-icon {
+    width: 1rem;
+    height: 1rem;
+}

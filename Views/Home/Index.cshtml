@@ -1,0 +1,168 @@
+@using Nattapong_7379_L002.Models.FoodOrdering
+@using Nattapong_7379_L002.Services.FoodOrdering
+@model IReadOnlyList<FoodMenuItem>
+@{
+    ViewData["Title"] = "เมนูอาหารและเครื่องดื่ม";
+    var categories = FoodMenuCategories.All;
+    var menu = Model;
+    var categoriesByKey = categories.ToDictionary(category => category.Key);
+    var rowLabels = new[] { "แถวบน", "แถวล่าง" };
+    const string catalogGridIds = "catalogGrid-1 catalogGrid-2";
+}
+
+<div class="cafe-home">
+    <section class="cafe-hero" data-storefront-hero aria-labelledby="cafe-title">
+        <img class="cafe-hero-image" src="~/images/iced-latte-center.webp" asp-append-version="true"
+             alt="" width="1536" height="1024" fetchpriority="high" />
+        <div class="cafe-frame cafe-hero-content">
+            <h1 id="cafe-title" class="cafe-hero-title" lang="en">
+                <span>Café &amp;</span>
+                <span>Photo Studio</span>
+            </h1>
+            <div class="cafe-hero-footer">
+                <p class="cafe-location">Phahonyothin Studio 14</p>
+                <a class="cafe-button cafe-button-light" href="#menuSection">
+                    ดูเมนู <span aria-hidden="true">↓</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="cafe-menu" id="menuSection" aria-labelledby="menu-title" data-menu-carousel>
+        <div class="cafe-frame">
+            @if (TempData["WelcomeMessage"] is string welcome)
+            {
+                <p class="cafe-welcome" role="status">@welcome</p>
+            }
+            <div class="cafe-menu-heading">
+                <div>
+                    <h2 id="menu-title">เมนูของร้าน</h2>
+                    <p>กาแฟ ชา ขนม และอาหารสำหรับสั่งที่ร้าน</p>
+                </div>
+                <button class="cafe-button cafe-button-dark" type="button" data-bs-toggle="modal" data-bs-target="#learnMoreModal">
+                    เกี่ยวกับร้านและสิทธิ์สมาชิก
+                </button>
+            </div>
+
+            <h3 class="cafe-filter-heading" id="cafe-filter-heading">หมวดหมู่เมนู</h3>
+            <div class="cafe-filters" role="group" aria-labelledby="cafe-filter-heading">
+                @foreach (var category in categories)
+                {
+                    <button type="button" data-filter="@category.Key" aria-pressed="@(category.Key == "all" ? "true" : "false")"
+                            aria-controls="@catalogGridIds">
+                        <span class="cafe-filter-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="@category.Icon"/></svg>
+                        </span>
+                        <span>@category.Label</span>
+                    </button>
+                }
+            </div>
+
+            <div class="cafe-carousel-rows">
+                @for (var row = 0; row < rowLabels.Length; row++)
+                {
+                    var gridId = $"catalogGrid-{row + 1}";
+                    var rowLabel = rowLabels[row];
+                    <div class="cafe-carousel" data-menu-row>
+                        <button class="cafe-carousel-arrow" type="button" data-menu-previous
+                                aria-label="@($"เลื่อนเมนู{rowLabel}ไปทางซ้าย")" aria-controls="@gridId" hidden>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+                        </button>
+                        <div class="cafe-carousel-viewport" data-menu-viewport role="group"
+                             aria-label="@($"รายการเมนู{rowLabel}")" tabindex="0">
+                            <ul class="cafe-grid" id="@gridId" data-menu-list>
+                                @for (var index = row; index < menu.Count; index += rowLabels.Length)
+                                {
+                                    var item = menu[index];
+                                    var category = categoriesByKey[item.Category];
+                                    <li class="cafe-menu-card" data-menu-index="@index" data-category="@item.Category">
+                                        <div class="cafe-card-media">
+                                            <img src="@item.ImageUrl"
+                                                 alt="" width="760" height="456" loading="lazy" />
+                                        </div>
+                                        <div class="cafe-card-info">
+                                            <h3 lang="en">@item.Name</h3>
+                                            <p class="cafe-card-description">@item.Description</p>
+                                            <p class="cafe-card-category">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="@category.Icon"/></svg>
+                                                <span>@category.Label</span>
+                                            </p>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <button class="cafe-carousel-arrow" type="button" data-menu-next
+                                aria-label="@($"เลื่อนเมนู{rowLabel}ไปทางขวา")" aria-controls="@gridId" hidden>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="cafe-feature" aria-labelledby="feature-title">
+        <div class="cafe-frame cafe-feature-grid">
+            <div class="cafe-feature-copy">
+                <p class="cafe-location">เมนูแนะนำ</p>
+                <h2 id="feature-title" lang="en">Iced Cafe<br />Latte</h2>
+                <p>เอสเปรสโซกับนมเย็น เสิร์ฟบนน้ำแข็ง</p>
+                <a class="cafe-button cafe-button-dark" id="showCoffeeMenu" href="#menuSection">
+                    ดูเมนูกาแฟ <span aria-hidden="true">↑</span>
+                </a>
+            </div>
+            <img src="~/images/iced-latte-feature.webp" asp-append-version="true" alt="ลาเต้เย็นในแก้วใส"
+                 width="960" height="960" loading="lazy" />
+        </div>
+    </section>
+</div>
+
+<a class="food-order-launch" asp-controller="FoodOrder" asp-action="Index">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v5a3 3 0 0 0 6 0V3M7 3v18m11-18c-2 2-3 5-3 9h4v9m0-18v9"/></svg>
+    สั่งอาหารที่โต๊ะ
+</a>
+
+<div class="modal fade cafe-membership-modal" id="learnMoreModal" tabindex="-1"
+     aria-labelledby="learnMoreTitle" aria-describedby="learnMoreIntro" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="learnMoreTitle">เกี่ยวกับร้านและสิทธิ์สมาชิก</h2>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="ปิด"></button>
+            </div>
+            <div class="modal-body">
+                <p id="learnMoreIntro">เมนูบนหน้านี้เป็นตัวอย่างอาหารและเครื่องดื่มที่สั่งได้ที่ร้าน</p>
+                <ul class="cafe-membership-benefits">
+                    <li>
+                        <span class="cafe-benefit-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v15H4zM8 3v6m8-6v6M4 11h16m-11 5h6"/></svg>
+                        </span>
+                        <span>จองโต๊ะที่คาเฟ่</span>
+                    </li>
+                    <li>
+                        <span class="cafe-benefit-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3zM9 13a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/></svg>
+                        </span>
+                        <span>จองสตูดิโอถ่ายภาพพร้อมไฟและอุปกรณ์</span>
+                    </li>
+                    <li>
+                        <span class="cafe-benefit-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7l9 9-7 7-9-9V4Zm4 4h.01"/></svg>
+                        </span>
+                        <span>รับส่วนลดสำหรับสมาชิก</span>
+                    </li>
+                </ul>
+                <p class="cafe-membership-note">เข้าสู่ระบบและชำระค่าสมาชิกเพื่อรับสิทธิ์</p>
+            </div>
+            <div class="modal-footer">
+                <button class="cafe-button cafe-button-outline" type="button" data-bs-dismiss="modal">กลับไปดูเมนู</button>
+                <a class="cafe-button cafe-button-dark" asp-controller="Account" asp-action="Login">เข้าสู่ระบบ</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="module" src="~/js/menu-carousel.mjs" asp-append-version="true"></script>
+}

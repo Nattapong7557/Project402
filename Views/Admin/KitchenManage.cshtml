@@ -1,0 +1,63 @@
+﻿@model List<Nattapong_7379_L002.Models.Booking>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Kitchen Staff - Manage";
+}
+
+<div class="ff-role-workspace p-4 bg-white rounded-4 shadow-sm">
+    <!-- Top Header with Pink Logout Button matching Figma -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <span class="badge bg-warning-subtle text-dark mb-1">ROLE WORKSPACE</span>
+            <h3 class="fw-bold m-0">Kitchen Staff - Manage</h3>
+            <p class="text-muted small m-0">ดูแลจัดเตรียมอาหาร เครื่องดื่ม และเซตขนมสำหรับแต่ละโต๊ะ</p>
+        </div>
+        <form asp-controller="Account" asp-action="LeaveAccount" method="post" class="m-0">
+            <button type="submit" class="btn px-4 py-2 fw-bold rounded-3" style="background:#ff9aa2; color:#4a1c1c; border:none;">
+                Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Filter Bars matching Figma -->
+    <div class="d-flex gap-2 mb-4">
+        <span class="px-4 py-2 rounded-2 fw-bold small" style="background:#b5cfb7; color:#2b4c2e;">กำลังจัดเตรียม (Preparing)</span>
+        <span class="px-4 py-2 rounded-2 fw-bold small" style="background:#d9e8da; color:#2b4c2e;">พร้อมเสิร์ฟ (Ready)</span>
+    </div>
+
+    <!-- 3-Column Order Cards Grid matching Figma -->
+    <div class="row g-4">
+        @{
+            var kitchenOrders = new[]
+            {
+                new { Table = "Table #1", Status = "รอทำ", Items = new[] { "Iced Matcha Latte x2", "Strawberry Shortcake x1" } },
+                new { Table = "Table #21", Status = "กำลังทำ", Items = new[] { "Hot Americano x1", "Almond Croissant x2", "High Tea Set x1" } },
+                new { Table = "Table #4", Status = "รอทำ", Items = new[] { "Yuzu Soda x2", "Banoffee Pie x1" } },
+                new { Table = "Table #12", Status = "พร้อมเสิร์ฟ", Items = new[] { "Caramel Milk x1", "Blueberry Cheesecake x1" } }
+            };
+        }
+        @foreach (var order in kitchenOrders)
+        {
+            <div class="col-md-4">
+                <div class="rounded-4 overflow-hidden shadow-sm border h-100 d-flex flex-column justify-content-between" style="background:#e0e0e0;">
+                    <div class="p-3" style="min-height:210px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark">@order.Table</span>
+                            <span class="badge rounded-pill" style="background:#b5cfb7; color:#2b4c2e;">@order.Status</span>
+                        </div>
+                        <ul class="small text-dark ps-3 mb-0">
+                            @foreach (var food in order.Items)
+                            {
+                                <li class="mb-1">@food</li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="p-2 d-flex gap-2" style="background:#c59b9b;">
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="this.closest('.rounded-4').querySelector('.badge').textContent='กำลังทำ'">กำลังทำ</button>
+                        <button class="btn btn-light btn-sm flex-fill fw-bold rounded-3" onclick="this.closest('.rounded-4').querySelector('.badge').textContent='เสิร์ฟแล้ว'">เสิร์ฟแล้ว</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

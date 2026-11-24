@@ -1,0 +1,115 @@
+@using Nattapong_7379_L002.ViewModel
+@model AdminBookingBoardViewModel
+@{
+    ViewData["Title"] = "จัดการรายการจอง";
+    var rows = Model.Rows;
+    var filters = Model.Filters;
+    var activeFilter = filters.Single(filter => filter.Key == Model.SelectedFilter);
+}
+
+<section class="work-page booking-board">
+    <header class="work-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <h1>จัดการรายการจอง</h1>
+            <p>ตรวจวันและเวลาของคิวจองโต๊ะหรือบริการ และอัปเดตสถานะตามขั้นตอน</p>
+        </div>
+        <a class="btn work-outline" asp-controller="Booking" asp-action="Table">
+            <partial name="_UiIcon" model="@("calendar")" /> ดูผังที่นั่ง
+        </a>
+    </header>
+
+    <nav class="row row-cols-2 row-cols-sm-3 row-cols-xl-6 g-2 g-lg-3 mb-4" aria-label="กรองตามสถานะการจอง">
+        @foreach (var item in filters)
+        {
+            var selected = item.Key == Model.SelectedFilter;
+            <div class="col">
+                <a class="card booking-filter h-100" asp-controller="Admin" asp-action="Bookings"
+                   asp-route-filter="@item.Key" aria-current="@(selected ? "page" : null)" data-booking-filter="@item.Key">
+                    <span class="work-icon"><partial name="_UiIcon" model="item.Icon" /></span>
+                    <span>@item.Label</span>
+                    <strong>@item.Count</strong>
+                </a>
+            </div>
+        }
+    </nav>
+
+    <div class="booking-table-panel card">
+        <div class="d-flex justify-content-between flex-wrap align-items-center gap-2 booking-table-heading">
+            <h2 class="h5 mb-0" id="booking-table-title">@activeFilter.Label</h2>
+            <span class="badge work-count">@rows.Count รายการ</span>
+        </div>
+        @if (rows.Count == 0)
+        {
+            <p class="work-empty booking-table-empty mb-0">ไม่มีรายการจองในสถานะนี้</p>
+        }
+        else
+        {
+            <div class="table-responsive" role="region" aria-labelledby="booking-table-title" tabindex="0">
+                <table class="table booking-table align-middle mb-0">
+                    <thead>
+                        <tr><th scope="col">เลขจอง</th><th scope="col">ลูกค้า</th><th scope="col">บริการและรายละเอียด</th>
+                            <th scope="col">วันและเวลา</th><th scope="col">สถานะ</th><th scope="col">การจัดการ</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in rows)
+                        {
+                            var booking = row.Booking;
+                            var service = booking.ServiceType switch
+                            {
+                                "Table" => "จองโต๊ะ", "Makeup" => "ช่างแต่งหน้า", "Photographer" => "ช่างภาพ",
+                                "Costume" => "เช่าชุด", _ => "โปรโมชัน"
+                            };
+                            <tr data-booking-id="@booking.Id">
+                                <th scope="row">#@booking.Id</th>
+                                <td>
+                                    <strong>@booking.User?.Name</strong>
+                                    <div class="small text-muted">@booking.User?.Email</div>
+                                    @if (!string.IsNullOrWhiteSpace(booking.User?.PhoneNumber))
+                                    {
+                                        <div class="small text-muted">@booking.User.PhoneNumber</div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="small text-muted">@service · @booking.GuestCount ท่าน</span>
+                                    <div class="fw-medium">@booking.ItemName</div>
+                                    @if (!string.IsNullOrWhiteSpace(booking.Note))
+                                    {
+                                        <div class="small text-muted">หมายเหตุ @booking.Note</div>
+                                    }
+                                </td>
+                                <td><div>@booking.BookingDate</div><small class="text-muted">@booking.TimeSlot</small></td>
+                                <td><span class="badge booking-status" data-booking-status="@row.Status.Group">@row.Status.Label</span></td>
+                                <td>
+                                    @if (row.Status.AllowedChanges.Count == 0)
+                                    {
+                                        <span class="text-muted" aria-label="ไม่มีการจัดการ">—</span>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @foreach (var nextStatus in row.Status.AllowedChanges)
+                                            {
+                                                var (label, style) = nextStatus switch
+                                                {
+                                                    "Confirmed" => ("ยืนยัน", "work-primary"),
+                                                    "Completed" => ("เสร็จสิ้น", "work-primary"),
+                                                    _ => ("ยกเลิก", "btn-outline-danger")
+                                                };
+                                                <form asp-controller="Admin" asp-action="UpdateBookingStatus" method="post">
+                                                    <input type="hidden" name="id" value="@booking.Id" />
+                                                    <input type="hidden" name="filter" value="@Model.SelectedFilter" />
+                                                    <button class="btn btn-sm @style" name="status" value="@nextStatus" type="submit"
+                                                            onclick="@(nextStatus == "Cancelled" ? "return confirm('ยืนยันยกเลิกรายการจองนี้หรือไม่?')" : null)">@label</button>
+                                                </form>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>

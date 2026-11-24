@@ -1,0 +1,101 @@
+@using Nattapong_7379_L002.Services
+@model Nattapong_7379_L002.ViewModel.KitchenViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "ครัว · รายการจองโต๊ะ";
+}
+
+<div class="ff-role-workspace">
+    <!-- Top Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom" style="border-color: var(--ff-theme-border-soft) !important;">
+        <div>
+            <h1 class="ff-role-header-title">รายการจองโต๊ะและงานครัว</h1>
+            <a class="cafe-button cafe-button-dark" asp-controller="FoodStaff" asp-action="Kitchen">ดูออเดอร์อาหารจากแคชเชียร์</a>
+        </div>
+    </div>
+
+    <!-- ฟอร์มเพิ่มออเดอร์เข้าครัวด้วย asp-controller, asp-action, asp-for -->
+    <div class="ff-workspace-form-card">
+        <div class="ff-workspace-form-title">ส่งรายการอาหาร/เครื่องดื่มเข้าครัว</div>
+        <form asp-controller="Kitchen" asp-action="AddKitchenOrder" method="post" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label asp-for="TableNumber" class="form-label">หมายเลขโต๊ะ / โซน</label>
+                <input asp-for="TableNumber" class="form-control" placeholder="เช่น Table #1 (Zone A)" required />
+            </div>
+            <div class="col-md-7">
+                <label asp-for="FoodItems" class="form-label">รายการอาหารและเครื่องดื่ม</label>
+                <input asp-for="FoodItems" class="form-control" placeholder="เช่น Iced Matcha Latte x2, Almond Croissant x1" required />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn ff-btn-submit-olive w-100">ส่งเข้าครัว</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Bars -->
+    <div class="ff-pill-filter-bar">
+        <span class="ff-pill-filter-item ff-pill-filter-amber">รอจัดการ (@Model.PreparingCount)</span>
+        <span class="ff-pill-filter-item ff-pill-filter-active">เสิร์ฟแล้ว (@Model.ReadyCount)</span>
+    </div>
+
+    <!-- 3-Column Order Cards Grid -->
+    <div class="row g-4">
+        @if (Model.KitchenOrders.Count == 0)
+        {
+            <div class="col-12">
+                <div class="p-5 text-center rounded-4 border bg-white" style="border-color: var(--ff-theme-border-soft) !important;">
+                    <h5 class="fw-bold mb-1" style="color: var(--ff-theme-brown-deep);">ยังไม่มีรายการออเดอร์ในครัว</h5>
+                    <p class="small text-muted mb-0">เมื่อมีรายการที่ Staff Queue อนุมัติแล้ว หรือส่งเข้าครัวใหม่ รายการจะมาปรากฏที่นี่</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var order in Model.KitchenOrders)
+            {
+                var next = TableBookingWorkflow.NextForKitchen(order);
+                <div class="col-md-6 col-lg-4">
+                    <div class="ff-card-workspace">
+                        <div class="ff-card-workspace-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="ff-card-workspace-title">@(order.ServiceType == "Table" ? "จองโต๊ะ" : "งานครัว") #@order.Id</span>
+                                @if (order.Status == "Preparing")
+                                {
+                                    <span class="ff-card-workspace-badge-amber">กำลังเตรียม</span>
+                                }
+                                else if (order.Status == "Served")
+                                {
+                                    <span class="ff-card-workspace-badge-green">เสิร์ฟแล้ว</span>
+                                }
+                                else
+                                {
+                                    <span class="ff-card-workspace-badge-blue">@order.Status</span>
+                                }
+                            </div>
+                            <div class="p-3 rounded-3 mb-2" style="background: var(--ff-theme-cream-alt);">
+                                <div class="fw-bold" style="color: var(--ff-theme-brown-deep); font-size: 0.98rem;">@order.ItemName</div>
+                                @if (!string.IsNullOrEmpty(order.Note))
+                                {
+                                    <div class="small text-muted">@order.Note</div>
+                                }
+                            </div>
+                            <div class="small text-muted">@order.BookingDate (@order.TimeSlot)</div>
+                        </div>
+                        @if (next is not null)
+                        {
+                            <div class="ff-card-workspace-actions">
+                                <form asp-controller="Kitchen" asp-action="UpdateOrderStatus" method="post" class="flex-fill m-0">
+                                    <input type="hidden" name="SelectedOrderId" value="@order.Id" />
+                                    <input type="hidden" name="NewStatus" value="@next" />
+                                    <button type="submit" class="btn ff-btn-card-action ff-btn-card-complete w-100">
+                                        @(next == "Preparing" ? "เริ่มจัดเตรียม" : "เสิร์ฟแล้ว")
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

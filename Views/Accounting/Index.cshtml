@@ -1,0 +1,61 @@
+@model Nattapong_7379_L002.ViewModel.AccountingViewModel
+@{
+    ViewData["Title"] = "รายการบัญชีอื่น";
+}
+<section class="work-page">
+    <header class="work-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div><h1>รายการบัญชีอื่น</h1><p>รายรับและรายจ่ายที่เจ้าหน้าที่บันทึกด้วยตนเอง</p></div>
+        <a class="btn work-outline" asp-controller="FoodStaff" asp-action="Accounting">กลับหน้ารับชำระบิลอาหาร</a>
+    </header>
+    @if (Model.Profit is { } profit)
+    {
+        <partial name="_MonthlyProfit" model="profit" />
+    }
+    <section class="card work-panel mb-4" aria-labelledby="manual-record-title">
+        <div class="work-panel-heading d-flex align-items-center gap-3">
+            <span class="work-icon"><partial name="_UiIcon" model="@("plus")" /></span>
+            <h2 class="h5 m-0" id="manual-record-title">บันทึกรายการ</h2>
+        </div>
+        <form asp-controller="Accounting" asp-action="AddRecord" method="post" class="row g-3 mt-1 align-items-end">
+            <div class="col-sm-4 col-lg-2">
+                <label asp-for="RecordType" class="form-label">ประเภท</label>
+                <select asp-for="RecordType" class="form-select"><option value="Income">รายรับ</option><option value="Expense">รายจ่าย</option></select>
+            </div>
+            <div class="col-sm-8 col-lg-3">
+                <label asp-for="Title" class="form-label">ชื่อรายการ</label>
+                <input asp-for="Title" class="form-control" maxlength="100" required />
+            </div>
+            <div class="col-sm-4 col-lg-2">
+                <label asp-for="Amount" class="form-label">จำนวนเงิน (บาท)</label>
+                <input asp-for="Amount" class="form-control" type="number" min="0.01" max="10000000" step="0.01" required />
+            </div>
+            <div class="col-sm-5 col-lg-3">
+                <label asp-for="Note" class="form-label">หมายเหตุ</label>
+                <input asp-for="Note" class="form-control" maxlength="255" />
+            </div>
+            <div class="col-sm-3 col-lg-2"><button class="btn work-primary w-100" type="submit">บันทึก</button></div>
+        </form>
+    </section>
+    <section class="card work-panel" aria-labelledby="manual-record-history">
+        <div class="work-panel-heading d-flex align-items-center gap-3">
+            <span class="work-icon"><partial name="_UiIcon" model="@("orders")" /></span>
+            <h2 class="h5 m-0" id="manual-record-history">ประวัติรายการบัญชี</h2>
+        </div>
+        @if (Model.Transactions.Count == 0)
+        {
+            <p class="work-empty mb-0">ยังไม่มีรายการบัญชีที่บันทึกด้วยตนเอง</p>
+        }
+        else
+        {
+            <ul class="work-list list-unstyled mb-0">
+                @foreach (var record in Model.Transactions)
+                {
+                    <li class="work-row">
+                        <div><strong>@record.ItemName</strong><p class="small text-muted mb-0">@record.BookingDate · @record.TimeSlot</p></div>
+                        <span class="badge work-count">@(record.ServiceType == "Expense" ? "รายจ่าย" : "รายรับ")</span>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</section>
