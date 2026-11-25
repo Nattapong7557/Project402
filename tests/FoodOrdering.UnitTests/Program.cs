@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.Extensions.Configuration;
 using Nattapong_7379_L002.Models;
 using Nattapong_7379_L002.Models.FoodOrdering;
 using Nattapong_7379_L002.Services;
@@ -156,46 +155,6 @@ var checks = new (string Name, Action Run)[]
         Equal<string?>(null, TableBookingWorkflow.NextForCashier(readyTable));
         Equal<string?>(null, TableBookingWorkflow.NextForCashier(manualKitchenOrder));
         Equal<string?>(null, TableBookingWorkflow.NextForCashier(unrelatedBooking));
-    }),
-    ("Demo accounts require explicit opt-in and Development", () =>
-    {
-        var config = new ConfigurationManager();
-        config["DemoAccounts:Password"] = new string('A', 12);
-
-        var defaultResult = DemoAccountSeed.ResolvePassword(true, config);
-        config["DemoAccounts:Enabled"] = "true";
-        var productionResult = DemoAccountSeed.ResolvePassword(false, config);
-        var developmentResult = DemoAccountSeed.ResolvePassword(true, config);
-
-        Equal<string?>(null, defaultResult);
-        Equal<string?>(null, productionResult);
-        Equal(config["DemoAccounts:Password"], developmentResult);
-    }),
-    ("Demo account password validation rejects missing and out-of-range values", () =>
-    {
-        var config = new ConfigurationManager();
-        config["DemoAccounts:Enabled"] = "true";
-
-        foreach (var password in new[] { null, new string(' ', 12), new string('A', 11), new string('A', 101) })
-        {
-            config["DemoAccounts:Password"] = password;
-
-            InvalidOperationException? error = null;
-            try
-            {
-                DemoAccountSeed.ResolvePassword(true, config);
-            }
-            catch (InvalidOperationException exception)
-            {
-                error = exception;
-            }
-
-            Equal(true, error?.Message.Contains("DemoAccounts:Password") == true);
-        }
-
-        var longestAllowedPassword = new string('A', 100);
-        config["DemoAccounts:Password"] = longestAllowedPassword;
-        Equal(longestAllowedPassword, DemoAccountSeed.ResolvePassword(true, config));
     }),
     ("Table slots block intersections but allow adjacent bookings", () =>
     {

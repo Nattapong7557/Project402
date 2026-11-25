@@ -11,8 +11,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection. See README.md.");
 
-var demoPassword = DemoAccountSeed.ResolvePassword(builder.Environment.IsDevelopment(), builder.Configuration);
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
@@ -31,7 +29,7 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
-    await initializer.InitializeAsync(demoPassword);
+    await initializer.InitializeAsync();
 }
 
 // Configure the HTTP request pipeline.

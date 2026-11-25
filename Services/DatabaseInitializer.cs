@@ -1,17 +1,16 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Nattapong_7379_L002.Models;
 
 namespace Nattapong_7379_L002.Services;
 
-internal sealed class DatabaseInitializer(Csi402dbContext db, IPasswordHasher<User> hasher)
+internal sealed class DatabaseInitializer(Csi402dbContext db)
 {
     private static readonly string[] RequiredRoles =
     [
         "User", "Admin", "Cashiers and staff", "Kitchen staff", "Staff queue", "Guest", "Accounting", "Owner"
     ];
 
-    public async Task InitializeAsync(string? demoPassword)
+    public async Task InitializeAsync()
     {
         await db.Database.OpenConnectionAsync();
         try
@@ -27,7 +26,7 @@ internal sealed class DatabaseInitializer(Csi402dbContext db, IPasswordHasher<Us
 
             try
             {
-                await SeedAsync(demoPassword);
+                await SeedAsync();
             }
             finally
             {
@@ -62,32 +61,18 @@ internal sealed class DatabaseInitializer(Csi402dbContext db, IPasswordHasher<Us
             throw new InvalidOperationException($"Missing database tables: {string.Join(", ", missing)}. See README.md for setup.");
     }
 
-    private async Task SeedAsync(string? demoPassword)
+    private async Task SeedAsync()
     {
-        var roles = (await db.Roles.ToListAsync()).ToDictionary(role => role.Name, StringComparer.OrdinalIgnoreCase);
+        var roleNames = (await db.Roles.Select(role => role.Name).ToListAsync())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var name in RequiredRoles)
         {
-            if (roles.ContainsKey(name))
-                continue;
-
-            var role = new Role { Name = name };
-            roles.Add(name, role);
-            db.Roles.Add(role);
+            if (roleNames.Add(name))
+                db.Roles.Add(new Role { Name = name });
         }
 
         if (!await db.ServiceItems.AnyAsync())
             db.ServiceItems.AddRange(DefaultServices.Create());
-
-        if (demoPassword is not null)
-        {
-            foreach (var account in DemoAccountSeed.Accounts)
-            {
-                if (await db.Users.AnyAsync(user => user.Username == account.Username || user.Email == account.Email))
-                    continue;
-
-                db.Staff.Add(account.CreateStaff(roles[account.RoleName], hasher, demoPassword));
-            }
-        }
 
         if (db.ChangeTracker.HasChanges())
             await db.SaveChangesAsync();
